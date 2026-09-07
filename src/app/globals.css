@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+/* Design tokens ported 1:1 from the approved clickable prototype
+   (rojgar-setu-prototype.html) so the real build matches exactly. */
+:root {
+  --bg: #F4F6F5; --surface: #FFFFFF; --surface-2: #EBEFEC; --border: #DCE3DE;
+  --ink: #1B2622; --ink-muted: #5B6A63; --ink-faint: #8C9A93;
+  --accent: #3E7A73; --accent-soft: #DCEBE8; --accent-ink: #245952;
+  --accent2: #8A6D3B; --accent2-soft: #F0E6D2;
+  --ok: #2E7D4F; --ok-soft: #DEEEE3;
+  --warn: #B8860B; --warn-soft: #F4EACB;
+  --danger: #B23A2E; --danger-soft: #F5DEDB;
+  --shadow: 0 1px 2px rgba(20,30,26,.06), 0 6px 20px rgba(20,30,26,.06);
+  --radius: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111613; --surface: #181F1B; --surface-2: #1F2823; --border: #2B362F;
+    --ink: #E7ECE9; --ink-muted: #A6B3AC; --ink-faint: #71807A;
+    --accent: #5FA89F; --accent-soft: #1C3532; --accent-ink: #8FC7BF;
+    --accent2: #C7A468; --accent2-soft: #332A17;
+    --ok: #4FAE78; --ok-soft: #173226;
+    --warn: #D7B24E; --warn-soft: #332B12;
+    --danger: #E2685A; --danger-soft: #3B211D;
+    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 6px 22px rgba(0,0,0,.35);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #111613; --surface: #181F1B; --surface-2: #1F2823; --border: #2B362F;
+  --ink: #E7ECE9; --ink-muted: #A6B3AC; --ink-faint: #71807A;
+  --accent: #5FA89F; --accent-soft: #1C3532; --accent-ink: #8FC7BF;
+  --accent2: #C7A468; --accent2-soft: #332A17;
+  --ok: #4FAE78; --ok-soft: #173226;
+  --warn: #D7B24E; --warn-soft: #332B12;
+  --danger: #E2685A; --danger-soft: #3B211D;
+  --shadow: 0 1px 2px rgba(0,0,0,.35), 0 6px 22px rgba(0,0,0,.35);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent2: var(--accent2);
+  --color-accent2-soft: var(--accent2-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Noto Sans", "Noto Sans Devanagari", system-ui, -apple-system,
+    "Segoe UI", Arial, sans-serif;
+}
+
+a { color: inherit; }
