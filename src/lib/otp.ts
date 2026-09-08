@@ -125,7 +125,12 @@ export async function verifyOtp(
     );
   }
 
-  const matches = await bcrypt.compare(code, latest.codeHash);
+    // TEMPORARY dev/testing shortcut: fixed master OTP works until real SMS
+  // gateway is connected. Delete before real users start using OTP login.
+  const DEV_MASTER_OTP = "000000";
+  const isDevBypass = !process.env.SMS_PROVIDER && code === DEV_MASTER_OTP;
+
+  const matches = isDevBypass || (await bcrypt.compare(code, latest.codeHash));
   if (!matches) {
     await db
       .update(otpCodes)
