@@ -1,10 +1,20 @@
 "use server";
 
 import { z } from "zod";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { approvers, reports, jobs, auditLogs, users, jobSeekerProfiles, jobGiverProfiles, verificationRequests } from "@/db/schema";
+import {
+  approvers,
+  reports,
+  jobs,
+  auditLogs,
+  users,
+  jobSeekerProfiles,
+  jobGiverProfiles,
+  verificationRequests,
+  applications,
+} from "@/db/schema";
 import { requireAdmin } from "@/lib/dal";
 
 const approverSchema = z.object({
@@ -149,6 +159,84 @@ export async function setProfileVerificationAction(
   });
 
   revalidatePath("/admin/users");
+}
+
+export type DeleteProfileResult = { error: string } | { success: true };
+
+/**
+ * Central Admin can permanently delete a Job Seeker or Job Giver profile —
+ * for removing old test/placeholder data (Section 9's seeded test accounts,
+ * or a bulk-import trial run) before the real thing replaces it. This only
+ * ever removes the one profile record and its own directly-owned rows
+ * (skills/location-preferences/applications/verification requests, and a
+ * Giver's own job postings). It deliberately does NOT delete the underlying
+ * `users` row/mobile-number account — that stays, exactly like any account
+ * that hasn't onboarded a profile yet (already a normal, supported state),
+ * so this can't cascade into deleting chat history, notifications or
+ * reports tied to that mobile number. Irreversible — there is no undo.
+ */
+export async function deleteProfileAction(
+  profileType: "seeker" | "giver",
+  profileId: number
+): Promise<DeleteProfileResult> {
+  const admin = await requireAdmin();
+
+  if (profileType === "seeker") {
+    const profile = await db.query.jobSeekerProfiles.findFirst({ where: eq(jobSeekerProfiles.id, profileId) });
+    if (!profile) return { error: "Profile not found." };
+
+    await db.transaction(async (tx) => {
+      // jobSeekerSkills and seekerLocationPreferences cascade automatically
+      // (onDelete: "cascade" in the schema) once the profile row is gone.
+      await tx.delete(applications).where(eq(applications.seekerId, profileId));
+      await tx
+        .delete(verificationRequests)
+        .where(and(eq(verificationRequests.profileType, "seeker"), eq(verificationRequests.profileId, profileId)));
+      await tx.delete(jobSeekerProfiles).where(eq(jobSeekerProfiles.id, profileId));
+    });
+
+    await db.insert(auditLogs).values({
+      actorType: "admin",
+      actorId: admin.adminId,
+      action: "seeker_profile_deleted",
+      targetType: "job_seeker_profile",
+      targetId: profileId,
+      before: { name: profile.name },
+      after: null,
+    });
+  } else {
+    const profile = await db.query.jobGiverProfiles.findFirst({ where: eq(jobGiverProfiles.id, profileId) });
+    if (!profile) return { error: "Profile not found." };
+
+    await db.transaction(async (tx) => {
+      const ownJobs = await tx.query.jobs.findMany({ where: eq(jobs.giverId, profileId), columns: { id: true } });
+      const jobIds = ownJobs.map((j) => j.id);
+      if (jobIds.length > 0) {
+        // jobSkills cascades automatically once the job row is gone.
+        await tx.delete(applications).where(inArray(applications.jobId, jobIds));
+        await tx.delete(jobs).where(eq(jobs.giverId, profileId));
+      }
+      await tx
+        .delete(verificationRequests)
+        .where(and(eq(verificationRequests.profileType, "giver"), eq(verificationRequests.profileId, profileId)));
+      await tx.delete(jobGiverProfiles).where(eq(jobGiverProfiles.id, profileId));
+    });
+
+    await db.insert(auditLogs).values({
+      actorType: "admin",
+      actorId: admin.adminId,
+      action: "giver_profile_deleted",
+      targetType: "job_giver_profile",
+      targetId: profileId,
+      before: { businessName: profile.businessName },
+      after: null,
+    });
+  }
+
+  revalidatePath("/admin/users");
+  revalidatePath("/admin/moderation");
+  revalidatePath("/");
+  return { success: true };
 }
 
 export async function setReportStatusAction(reportId: number, status: "reviewed" | "dismissed") {

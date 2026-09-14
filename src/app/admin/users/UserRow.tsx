@@ -1,8 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { toggleUserStatusAction, setProfileVerificationAction } from "@/app/actions/admin";
+import { toggleUserStatusAction, setProfileVerificationAction, deleteProfileAction } from "@/app/actions/admin";
 import { StatusBadge } from "@/components/ui";
 
 // Colors come from the shared StatusBadge (ui.tsx) now — this only supplies
@@ -46,6 +46,67 @@ function ActionPill({
     >
       {children}
     </button>
+  );
+}
+
+/** Delete needs its own confirm step (unlike Approve/Reject/Reset, it can't
+ * be undone) but the app never uses native browser confirm() dialogs
+ * elsewhere, so this does it inline: first click swaps the button for a
+ * "Sure? / Cancel" pair instead of popping a native dialog, second click
+ * (on "Sure?") actually deletes. Resets back to the plain button if the
+ * admin clicks anywhere else that re-renders this row. */
+function DeleteProfileButton({
+  profileType,
+  profileId,
+  onDeleted,
+}: {
+  profileType: "seeker" | "giver";
+  profileId: number;
+  onDeleted: () => void;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  if (confirming) {
+    return (
+      <div className="flex items-center gap-1.5">
+        <ActionPill
+          tone="danger"
+          disabled={isPending}
+          onClick={() =>
+            startTransition(async () => {
+              const res = await deleteProfileAction(profileType, profileId);
+              if ("error" in res) {
+                setError(res.error);
+                setConfirming(false);
+              } else {
+                onDeleted();
+              }
+            })
+          }
+        >
+          {isPending ? "Deleting…" : "Sure? Delete"}
+        </ActionPill>
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={() => setConfirming(false)}
+          className="text-xs text-[var(--ink-muted)] underline"
+        >
+          Cancel
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <ActionPill tone="muted" onClick={() => setConfirming(true)}>
+        Delete profile
+      </ActionPill>
+      {error && <p className="text-xs text-[var(--danger)] mt-1">{error}</p>}
+    </>
   );
 }
 
@@ -95,6 +156,7 @@ function ProfileVerification({
           </ActionPill>
         )}
       </div>
+      <DeleteProfileButton profileType={profileType} profileId={profileId} onDeleted={() => router.refresh()} />
     </div>
   );
 }
