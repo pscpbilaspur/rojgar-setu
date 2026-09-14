@@ -64,8 +64,8 @@ export function PostJobForm({
           What does this job involve?
         </label>
         <p className="text-xs text-[var(--ink-faint)] mb-1">
-          Describe the day-to-day work clearly — what they'll actually do, timings/shift, and anything else a Job
-          Seeker should know before applying.
+          Describe the day-to-day work clearly — what they'll actually do, the timings or shift, and anything else a
+          Job Seeker should know before applying.
         </p>
         <textarea
           value={description}
@@ -77,7 +77,7 @@ export function PostJobForm({
       </div>
       <div>
         <label className="block text-sm font-medium text-[var(--ink)] mb-1">
-          Minimum Required (optional)
+          Minimum qualification required (optional)
         </label>
         <select value={qualificationId} onChange={(e) => setQualificationId(e.target.value ? Number(e.target.value) : "")} className={inputCls}>
           <option value="">No specific qualification required</option>

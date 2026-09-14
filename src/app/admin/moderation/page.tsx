@@ -30,7 +30,7 @@ export default async function ModerationPage() {
               <tr className="text-left text-[var(--ink-muted)] border-b border-[var(--border)]">
                 <th className="py-2 px-2">Title</th>
                 <th className="py-2 px-2">Posted by</th>
-                <th className="py-2 px-2">State</th>
+                <th className="py-2 px-2">Status</th>
                 <th className="py-2 px-2"></th>
               </tr>
             </thead>

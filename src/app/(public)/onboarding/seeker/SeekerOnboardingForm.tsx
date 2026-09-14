@@ -195,7 +195,7 @@ export function SeekerOnboardingForm({
               value={additionalNote}
               onChange={(e) => setAdditionalNote(e.target.value)}
               rows={2}
-              placeholder="Anything not covered above..."
+              placeholder="e.g. Available immediately, own two-wheeler, flexible with timings..."
               className={inputCls}
             />
           </Field>
@@ -240,7 +240,8 @@ export function SeekerOnboardingForm({
               ))}
             </div>
             <p className="text-xs text-[var(--ink-faint)] mt-1">
-              No sub-district &quot;area&quot; option — district is the finest location detail.
+              Pick every district you&apos;re willing to work in — no need to specify a particular area or town
+              within it.
             </p>
           </Field>
           <div className="flex gap-2">

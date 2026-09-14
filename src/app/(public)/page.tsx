@@ -5,12 +5,7 @@ import { FeatureCard, StepCard, CollapsibleSection } from "@/components/ui";
 import { getRecentOpenJobs } from "@/lib/queries/jobs";
 import { countPlatformStats } from "@/lib/queries/people";
 import { getCurrentUser } from "@/lib/dal";
-
-const JOB_TYPE_LABEL: Record<string, { hi: string; en: string }> = {
-  full_time: { hi: "पूर्णकालिक", en: "Full-time" },
-  part_time: { hi: "अंशकालिक", en: "Part-time" },
-  wfh: { hi: "घर से काम", en: "Work From Home" },
-};
+import { jobTypeLabel } from "@/lib/format";
 
 export default async function HomePage() {
   const { lang, t } = await getTranslations();
@@ -166,7 +161,7 @@ export default async function HomePage() {
                   <h4 className="font-semibold text-[var(--ink)]">{job.title}</h4>
                   <p className="text-[13px] text-[var(--ink-muted)] mt-1">{job.businessName}</p>
                   <p className="text-[12px] text-[var(--ink-faint)] mt-2">
-                    {job.district} · {JOB_TYPE_LABEL[job.jobType]?.[lang] ?? job.jobType}
+                    {job.district} · {jobTypeLabel(job.jobType, lang)}
                   </p>
                 </Link>
               ))}

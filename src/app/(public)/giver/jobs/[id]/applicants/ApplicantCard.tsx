@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { decideApplicationAction } from "@/app/actions/jobs";
 import type { ApplicantRow } from "@/lib/queries/applicants";
 import { StatusBadge } from "@/components/ui";
+import { VERIFICATION_STATUS_LABEL } from "@/lib/format";
 
 export function ApplicantCard({ applicant }: { applicant: ApplicantRow }) {
   const [status, setStatus] = useState(applicant.status);
@@ -28,10 +29,11 @@ export function ApplicantCard({ applicant }: { applicant: ApplicantRow }) {
             {applicant.seekerName}
           </Link>
           <p className="text-sm text-[var(--ink-muted)]">
-            {applicant.mobile ? `Mobile: ${applicant.mobile}` : "Mobile: not shared by user"}
+            {applicant.mobile ? `Mobile: ${applicant.mobile}` : "Mobile number not shared"}
           </p>
           <p className="text-xs text-[var(--ink-faint)] mt-1">
-            Expected salary: {applicant.expectedSalary ?? "-"} · Verification: {applicant.verificationStatus}
+            Expected salary: {applicant.expectedSalary ?? "-"} ·{" "}
+            {VERIFICATION_STATUS_LABEL[applicant.verificationStatus] ?? applicant.verificationStatus}
           </p>
           <Link href={`/people/${applicant.seekerId}`} className="text-xs underline text-[var(--accent-ink)] inline-block mt-1">
             View full profile

@@ -2,9 +2,12 @@ import Link from "next/link";
 import { requireUser } from "@/lib/dal";
 import { getThreadsForUser } from "@/lib/queries/chat";
 
+// "accepted" is labeled "Ongoing" rather than "Active" so it doesn't read
+// like the account-status "Active"/"Suspended" used elsewhere in the app
+// (a different concept — a conversation's own status, not an account's).
 const STATUS_LABEL: Record<string, { text: string; cls: string }> = {
   pending: { text: "Pending", cls: "bg-[var(--warn-soft)] text-[var(--ink)]" },
-  accepted: { text: "Active", cls: "bg-[var(--ok-soft)] text-[var(--ok)]" },
+  accepted: { text: "Ongoing", cls: "bg-[var(--ok-soft)] text-[var(--ok)]" },
   declined: { text: "Declined", cls: "bg-[var(--danger-soft)] text-[var(--danger)]" },
   blocked: { text: "Blocked", cls: "bg-[var(--danger-soft)] text-[var(--danger)]" },
 };
@@ -32,8 +35,9 @@ export default async function MessagesPage() {
               <div className="flex justify-between items-start">
                 <h3 className="font-semibold text-[var(--ink)]">{t.otherName}</h3>
                 <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_LABEL[t.status]?.cls ?? ""}`}>
-                  {STATUS_LABEL[t.status]?.text ?? t.status}
-                  {t.status === "pending" && !t.isInitiator ? " — respond" : ""}
+                  {t.status === "pending" && !t.isInitiator
+                    ? "Awaiting your response"
+                    : STATUS_LABEL[t.status]?.text ?? t.status}
                 </span>
               </div>
               {t.lastMessage && (

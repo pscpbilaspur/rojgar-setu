@@ -15,7 +15,7 @@ export default async function NotificationsPage() {
         {hasUnread && (
           <form action={markAllNotificationsReadAction}>
             <button type="submit" className="text-sm underline text-[var(--ink-muted)]">
-              Mark all read
+              Mark all as read
             </button>
           </form>
         )}

@@ -2,12 +2,8 @@ import Link from "next/link";
 import { browseOpenJobs } from "@/lib/queries/jobs-browse";
 import { getAllDistricts } from "@/lib/queries/lookups";
 import { getCurrentUser } from "@/lib/dal";
-
-const JOB_TYPE_LABEL: Record<string, string> = {
-  full_time: "Full-time",
-  part_time: "Part-time",
-  wfh: "Work From Home",
-};
+import { getTranslations } from "@/lib/i18n";
+import { jobTypeLabel } from "@/lib/format";
 
 export default async function JobsPage({
   searchParams,
@@ -18,6 +14,7 @@ export default async function JobsPage({
   const districtId = params.district ? Number(params.district) : undefined;
   const jobType = params.type || undefined;
 
+  const { lang } = await getTranslations();
   const current = await getCurrentUser();
   const [jobsList, districts] = await Promise.all([
     browseOpenJobs({ districtId, jobType }, current?.seekerProfile?.id),
@@ -37,9 +34,9 @@ export default async function JobsPage({
         </select>
         <select name="type" defaultValue={params.type ?? ""} className="border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-sm">
           <option value="">Any job type</option>
-          <option value="full_time">Full-time</option>
-          <option value="part_time">Part-time</option>
-          <option value="wfh">Work From Home</option>
+          <option value="full_time">{jobTypeLabel("full_time", lang)}</option>
+          <option value="part_time">{jobTypeLabel("part_time", lang)}</option>
+          <option value="wfh">{jobTypeLabel("wfh", lang)}</option>
         </select>
         <button type="submit" className="bg-[var(--accent)] text-white rounded-md px-4 py-2 text-sm font-medium">
           Filter
@@ -67,7 +64,7 @@ export default async function JobsPage({
               </div>
               <p className="text-sm text-[var(--ink-muted)] mt-0.5">{job.businessName}</p>
               <p className="text-xs text-[var(--ink-faint)] mt-2">
-                {job.district} · {JOB_TYPE_LABEL[job.jobType]}
+                {job.district} · {jobTypeLabel(job.jobType, lang)}
                 {job.salaryRange ? ` · ${job.salaryRange}` : ""}
               </p>
             </Link>

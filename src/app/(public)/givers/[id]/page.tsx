@@ -3,15 +3,12 @@ import Link from "next/link";
 import { getGiverPublicProfile } from "@/lib/queries/people";
 import { getCurrentUser } from "@/lib/dal";
 import { MessageButton } from "@/components/MessageButton";
-
-const JOB_TYPE_LABEL: Record<string, string> = {
-  full_time: "Full-time",
-  part_time: "Part-time",
-  wfh: "Work From Home",
-};
+import { VERIFICATION_STATUS_LABEL, jobTypeLabel } from "@/lib/format";
+import { getTranslations } from "@/lib/i18n";
 
 export default async function GiverProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const { lang } = await getTranslations();
   const current = await getCurrentUser();
   const profile = await getGiverPublicProfile(Number(id), Boolean(current));
   if (!profile) notFound();
@@ -25,7 +22,7 @@ export default async function GiverProfilePage({ params }: { params: Promise<{ i
         <h1 className="text-xl font-bold text-[var(--ink)]">{profile.businessName}</h1>
         <p className="text-[var(--ink-muted)] mt-1">{profile.category} · {profile.district}</p>
         {profile.verificationPending && (
-          <p className="text-sm text-[var(--warn)] mt-2">Basic verification not yet done</p>
+          <p className="text-sm text-[var(--warn)] mt-2">{VERIFICATION_STATUS_LABEL.not_yet_done}</p>
         )}
         {profile.about && <p className="mt-4 whitespace-pre-line text-[var(--ink)]">{profile.about}</p>}
         {profile.website && (
@@ -54,7 +51,7 @@ export default async function GiverProfilePage({ params }: { params: Promise<{ i
           )}
         </div>
 
-        <div className="section-title text-sm font-semibold text-[var(--ink)] mt-6 mb-2">Open roles</div>
+        <div className="section-title text-sm font-semibold text-[var(--ink)] mt-6 mb-2">Open jobs</div>
         {profile.openJobs.length === 0 ? (
           <p className="text-sm text-[var(--ink-muted)]">No active jobs right now.</p>
         ) : (
@@ -66,7 +63,7 @@ export default async function GiverProfilePage({ params }: { params: Promise<{ i
                 className="border border-[var(--border)] rounded-[var(--radius)] p-3"
               >
                 <h4 className="font-medium text-[var(--ink)] text-sm">{j.title}</h4>
-                <p className="text-xs text-[var(--ink-faint)] mt-1">{JOB_TYPE_LABEL[j.jobType]}</p>
+                <p className="text-xs text-[var(--ink-faint)] mt-1">{jobTypeLabel(j.jobType, lang)}</p>
               </Link>
             ))}
           </div>

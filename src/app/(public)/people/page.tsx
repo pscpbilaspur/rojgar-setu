@@ -2,12 +2,8 @@ import Link from "next/link";
 import { browseSeekers } from "@/lib/queries/people";
 import { getAllDistricts } from "@/lib/queries/lookups";
 import { getCurrentUser } from "@/lib/dal";
-
-const JOB_TYPE_LABEL: Record<string, string> = {
-  full_time: "Full-time",
-  part_time: "Part-time",
-  wfh: "Work From Home",
-};
+import { VERIFICATION_STATUS_LABEL, jobTypeLabel } from "@/lib/format";
+import { getTranslations } from "@/lib/i18n";
 
 export default async function PeoplePage({
   searchParams,
@@ -18,6 +14,7 @@ export default async function PeoplePage({
   const districtId = params.district ? Number(params.district) : undefined;
   const jobType = params.type || undefined;
 
+  const { lang } = await getTranslations();
   const current = await getCurrentUser();
   const viewer = current?.giverProfile ? { giverId: current.giverProfile.id, giverUserId: current.user.id } : undefined;
   const [people, districts] = await Promise.all([
@@ -38,9 +35,9 @@ export default async function PeoplePage({
         </select>
         <select name="type" defaultValue={params.type ?? ""} className="border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-sm">
           <option value="">Any job type</option>
-          <option value="full_time">Full-time</option>
-          <option value="part_time">Part-time</option>
-          <option value="wfh">Work From Home</option>
+          <option value="full_time">{jobTypeLabel("full_time", lang)}</option>
+          <option value="part_time">{jobTypeLabel("part_time", lang)}</option>
+          <option value="wfh">{jobTypeLabel("wfh", lang)}</option>
         </select>
         <button type="submit" className="bg-[var(--accent)] text-white rounded-md px-4 py-2 text-sm font-medium">
           Filter
@@ -68,7 +65,7 @@ export default async function PeoplePage({
               </div>
               <p className="text-sm text-[var(--ink-muted)] mt-0.5">{p.qualification ?? "—"}</p>
               <p className="text-xs text-[var(--ink-faint)] mt-2">
-                {p.district} · {JOB_TYPE_LABEL[p.jobType]}
+                {p.district} · {jobTypeLabel(p.jobType, lang)}
               </p>
               {p.preferredDistricts.length > 0 && (
                 <p className="text-xs text-[var(--ink-faint)] mt-1">
@@ -76,7 +73,7 @@ export default async function PeoplePage({
                 </p>
               )}
               {p.verificationPending && (
-                <p className="text-xs text-[var(--warn)] mt-1">Basic verification not yet done</p>
+                <p className="text-xs text-[var(--warn)] mt-1">{VERIFICATION_STATUS_LABEL.not_yet_done}</p>
               )}
             </Link>
           ))}

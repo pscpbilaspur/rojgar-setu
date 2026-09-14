@@ -26,7 +26,7 @@ export function ReportJobButton({ jobId }: { jobId: number }) {
       <textarea
         value={reason}
         onChange={(e) => setReason(e.target.value)}
-        placeholder="What's wrong with this listing?"
+        placeholder="What's wrong with this job?"
         rows={2}
         className="w-full border border-[var(--border)] rounded-md px-3 py-2 text-sm bg-[var(--surface)] text-[var(--ink)]"
       />

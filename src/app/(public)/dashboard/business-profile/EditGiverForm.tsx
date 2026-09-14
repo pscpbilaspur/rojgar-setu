@@ -95,12 +95,12 @@ export function EditGiverForm({
       <Field label="About">
         <textarea value={about} onChange={(e) => setAbout(e.target.value)} className={inputCls} rows={3} />
       </Field>
-      <Field label="Website / Social (optional)">
+      <Field label="Website / social (optional)">
         <input value={website} onChange={(e) => setWebsite(e.target.value)} className={inputCls} />
       </Field>
 
       {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
-      {saved && <p className="text-sm text-[var(--ok)]">Saved.</p>}
+      {saved && <p className="text-sm text-[var(--ok)]">Saved ✓</p>}
       <button
         type="button"
         onClick={submit}

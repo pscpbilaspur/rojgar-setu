@@ -6,13 +6,7 @@ import { getUnreadCount } from "@/lib/queries/notifications";
 import { db } from "@/db";
 import { applications, jobs } from "@/db/schema";
 import { DashboardHeader, StatCard, NavCard, StatusBadge } from "@/components/ui";
-
-const VERIFICATION_LABEL: Record<string, string> = {
-  pending: "Verification pending",
-  confirmed: "Verified",
-  unable_to_confirm: "Unable to confirm",
-  not_yet_done: "Basic Verification not yet done",
-};
+import { VERIFICATION_STATUS_LABEL } from "@/lib/format";
 
 export default async function DashboardPage() {
   const { user, seekerProfile, giverProfile } = await requireUser();
@@ -79,7 +73,7 @@ export default async function DashboardPage() {
             <h2 className="font-semibold text-[var(--ink)]">Job Seeker — {seekerProfile.name}</h2>
             <StatusBadge
               status={seekerProfile.verificationStatus}
-              label={VERIFICATION_LABEL[seekerProfile.verificationStatus] ?? seekerProfile.verificationStatus}
+              label={VERIFICATION_STATUS_LABEL[seekerProfile.verificationStatus] ?? seekerProfile.verificationStatus}
             />
           </div>
           <div className="grid grid-cols-2 gap-3 mb-3">
@@ -101,7 +95,7 @@ export default async function DashboardPage() {
             <h2 className="font-semibold text-[var(--ink)]">Job Giver — {giverProfile.businessName}</h2>
             <StatusBadge
               status={giverProfile.verificationStatus}
-              label={VERIFICATION_LABEL[giverProfile.verificationStatus] ?? giverProfile.verificationStatus}
+              label={VERIFICATION_STATUS_LABEL[giverProfile.verificationStatus] ?? giverProfile.verificationStatus}
             />
           </div>
           <div className="grid grid-cols-2 gap-3 mb-3">

@@ -2,15 +2,12 @@ import { notFound } from "next/navigation";
 import { getSeekerPublicProfile } from "@/lib/queries/people";
 import { getCurrentUser } from "@/lib/dal";
 import { MessageButton } from "@/components/MessageButton";
-
-const JOB_TYPE_LABEL: Record<string, string> = {
-  full_time: "Full-time",
-  part_time: "Part-time",
-  wfh: "Work From Home",
-};
+import { VERIFICATION_STATUS_LABEL, jobTypeLabel } from "@/lib/format";
+import { getTranslations } from "@/lib/i18n";
 
 export default async function SeekerProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const { lang } = await getTranslations();
   const current = await getCurrentUser();
   const profile = await getSeekerPublicProfile(Number(id), Boolean(current));
   if (!profile) notFound();
@@ -24,11 +21,11 @@ export default async function SeekerProfilePage({ params }: { params: Promise<{ 
         <h1 className="text-xl font-bold text-[var(--ink)]">{profile.name}</h1>
         <p className="text-[var(--ink-muted)] mt-1">{profile.qualification ?? "—"}</p>
         <p className="text-sm text-[var(--ink-faint)] mt-1">
-          Hometown: {profile.district} · {JOB_TYPE_LABEL[profile.jobType]}
+          Hometown: {profile.district} · {jobTypeLabel(profile.jobType, lang)}
           {profile.expectedSalary ? ` · ${profile.expectedSalary}` : ""}
         </p>
         {profile.verificationPending && (
-          <p className="text-sm text-[var(--warn)] mt-2">Basic verification not yet done</p>
+          <p className="text-sm text-[var(--warn)] mt-2">{VERIFICATION_STATUS_LABEL.not_yet_done}</p>
         )}
 
         {profile.preferredDistricts.length > 0 && (

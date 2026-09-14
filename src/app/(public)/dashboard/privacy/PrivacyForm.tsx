@@ -37,7 +37,7 @@ export function PrivacyForm({ initialPolicy }: { initialPolicy: "never" | "on_ap
         ))}
       </select>
       {isPending && <p className="text-xs text-[var(--ink-faint)]">Saving...</p>}
-      {saved && !isPending && <p className="text-xs text-[var(--ok)]">Saved.</p>}
+      {saved && !isPending && <p className="text-xs text-[var(--ok)]">Saved ✓</p>}
     </div>
   );
 }

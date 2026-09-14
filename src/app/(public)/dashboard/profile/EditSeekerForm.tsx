@@ -138,7 +138,7 @@ export function EditSeekerForm({
           value={additionalNote}
           onChange={(e) => setAdditionalNote(e.target.value)}
           rows={2}
-          placeholder="Anything not covered above..."
+          placeholder="e.g. Available immediately, own two-wheeler, flexible with timings..."
           className={inputCls}
         />
       </Field>
@@ -176,7 +176,7 @@ export function EditSeekerForm({
       </Field>
 
       {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
-      {saved && <p className="text-sm text-[var(--ok)]">Saved.</p>}
+      {saved && <p className="text-sm text-[var(--ok)]">Saved ✓</p>}
       <button
         type="button"
         onClick={submit}

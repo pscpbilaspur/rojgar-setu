@@ -2,17 +2,14 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getJobDetail } from "@/lib/queries/jobs-browse";
 import { getCurrentUser } from "@/lib/dal";
+import { getTranslations } from "@/lib/i18n";
+import { jobTypeLabel } from "@/lib/format";
 import { ApplyButton } from "./ApplyButton";
 import { ReportJobButton } from "./ReportJobButton";
 
-const JOB_TYPE_LABEL: Record<string, string> = {
-  full_time: "Full-time",
-  part_time: "Part-time",
-  wfh: "Work From Home",
-};
-
 export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const { lang } = await getTranslations();
   const current = await getCurrentUser();
   const job = await getJobDetail(Number(id), current?.seekerProfile?.id);
   if (!job) notFound();
@@ -28,7 +25,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
           <Link href={`/givers/${job.giverId}`} className="underline">{job.businessName}</Link>
         </p>
         <p className="text-sm text-[var(--ink-faint)] mt-1">
-          {job.district} · {JOB_TYPE_LABEL[job.jobType]}
+          {job.district} · {jobTypeLabel(job.jobType, lang)}
           {job.salaryRange ? ` · ${job.salaryRange}` : ""}
         </p>
         {job.qualification && (
@@ -47,7 +44,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
         <div className="mt-6">
           {!current ? (
             <Link href="/login" className="bg-[var(--accent)] text-white rounded-md px-5 py-2 font-medium inline-block">
-              Login to Apply
+              Log in to Apply
             </Link>
           ) : !current.seekerProfile ? (
             <p className="text-sm text-[var(--ink-muted)]">
