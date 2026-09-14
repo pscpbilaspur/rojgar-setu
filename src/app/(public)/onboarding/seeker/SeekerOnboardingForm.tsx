@@ -98,7 +98,10 @@ export function SeekerOnboardingForm({
         name,
         fatherName,
         hometownDistrictId: Number(hometownDistrictId),
-        qualificationId: qualificationId ? Number(qualificationId) : undefined,
+        // -1 is the "Other" sentinel in the dropdown, not a real qualification
+        // id — never send it as qualificationId (the server requires a
+        // positive id); qualificationOther carries the actual free-text value.
+        qualificationId: qualificationId && qualificationId !== -1 ? Number(qualificationId) : undefined,
         qualificationOther: qualificationOther || undefined,
         skillIds: selectedSkillIds,
         experience: experience || undefined,
