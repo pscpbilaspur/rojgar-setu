@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireApprover } from "@/lib/dal";
 import {
   getPendingVerificationsForApprover,
@@ -23,6 +24,7 @@ export default async function ApproverDashboardPage() {
       <DashboardHeader
         title="Approver"
         subtitle={identity ? `${identity.name} · ${identity.district}, ${identity.state}` : undefined}
+        menuItems={[{ href: "/approver/logs", label: "My Logs", icon: "📜" }]}
         logoutAction={approverLogoutAction}
       />
 
@@ -47,7 +49,12 @@ export default async function ApproverDashboardPage() {
 
       {decided.length > 0 && (
         <>
-          <h2 className="font-semibold text-[var(--ink)] mb-3">Recently Decided</h2>
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="font-semibold text-[var(--ink)]">Recently Decided</h2>
+            <Link href="/approver/logs" className="text-sm text-[var(--accent-ink)] underline underline-offset-2">
+              View all →
+            </Link>
+          </div>
           <div className="space-y-2">
             {decided.map((item) => (
               <div

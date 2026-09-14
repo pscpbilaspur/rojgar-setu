@@ -20,6 +20,10 @@ export type VerificationQueueItem = {
   mobile: string;
   district: string;
   createdAt: Date;
+  // Only set by getDecidedVerificationsForApprover — when the Approver
+  // actually made the decision (verificationRequests.updatedAt), as
+  // opposed to createdAt which is when the request first came in.
+  decidedAt?: Date;
 };
 
 /** Pending verification requests assigned to `approverId` (Section 4.2:
@@ -151,6 +155,7 @@ export async function getDecidedVerificationsForApprover(
           mobile: row.mobile,
           district: row.district,
           createdAt: req.createdAt,
+          decidedAt: req.updatedAt,
         });
       }
     } else {
@@ -177,6 +182,7 @@ export async function getDecidedVerificationsForApprover(
           mobile: row.mobile,
           district: row.district,
           createdAt: req.createdAt,
+          decidedAt: req.updatedAt,
         });
       }
     }

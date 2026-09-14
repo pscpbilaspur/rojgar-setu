@@ -26,7 +26,12 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <DashboardHeader title="Central Admin" subtitle={session.username} logoutAction={adminLogoutAction} />
+      <DashboardHeader
+        title="Central Admin"
+        subtitle={session.username}
+        menuItems={[{ href: "/admin/audit-log", label: "Audit Log", icon: "📜" }]}
+        logoutAction={adminLogoutAction}
+      />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <StatCard label="Job Seekers" value={seekerCount.n} />

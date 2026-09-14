@@ -1,33 +1,36 @@
 import Link from "next/link";
+import { AccountMenu, type AccountMenuItem } from "@/components/AccountMenu";
 
 /**
  * Shared dashboard building blocks — one visual standard reused across the
  * Job Seeker/Giver dashboard, the Admin dashboard, and the Approver
  * dashboard, so all four panels look and behave the same way (same header
- * row + logout, same stat tiles, same nav-card grid, same status pill
+ * row + account menu, same stat tiles, same nav-card grid, same status pill
  * colors) instead of each panel inventing its own layout.
  */
 
 export function DashboardHeader({
   title,
   subtitle,
+  menuItems = [],
   logoutAction,
 }: {
   title: string;
   subtitle?: string;
+  /** Panel-specific settings/profile/log links shown above Log out in the
+   * "☰" menu — e.g. Edit Profile for a Seeker, My Logs for an Approver.
+   * Safe to leave empty: the menu still renders with just Log out inside,
+   * so every panel looks the same even before it has settings of its own. */
+  menuItems?: AccountMenuItem[];
   logoutAction: () => Promise<void>;
 }) {
   return (
-    <div className="flex justify-between items-center mb-6">
-      <div>
+    <div className="flex justify-between items-center mb-6 gap-3">
+      <div className="min-w-0">
         <h1 className="text-xl font-bold text-[var(--ink)]">{title}</h1>
-        {subtitle && <p className="text-sm text-[var(--ink-muted)] mt-0.5">{subtitle}</p>}
+        {subtitle && <p className="text-sm text-[var(--ink-muted)] mt-0.5 truncate">{subtitle}</p>}
       </div>
-      <form action={logoutAction}>
-        <button type="submit" className="text-sm underline text-[var(--ink-muted)] shrink-0">
-          Log out
-        </button>
-      </form>
+      <AccountMenu items={menuItems} logoutAction={logoutAction} />
     </div>
   );
 }

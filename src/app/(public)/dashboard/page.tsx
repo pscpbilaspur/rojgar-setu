@@ -23,6 +23,18 @@ export default async function DashboardPage() {
 
   const unreadCount = await getUnreadCount(user.id);
 
+  // Same "☰" account menu as Admin/Approver (DashboardHeader/AccountMenu) —
+  // each profile type's own settings pages, in the order they'd expect.
+  const menuItems = [
+    ...(seekerProfile
+      ? [
+          { href: "/dashboard/profile", label: "Edit Profile", icon: "✏️" },
+          { href: "/dashboard/privacy", label: "Privacy Settings", icon: "🔒" },
+        ]
+      : []),
+    ...(giverProfile ? [{ href: "/dashboard/business-profile", label: "Edit Business Profile", icon: "✏️" }] : []),
+  ];
+
   const [applicationCount, jobCount, openJobCount] = await Promise.all([
     seekerProfile
       ? db
@@ -49,7 +61,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
-      <DashboardHeader title="Dashboard" subtitle={`Mobile: ${user.mobile}`} logoutAction={logoutAction} />
+      <DashboardHeader
+        title="Dashboard"
+        subtitle={`Mobile: ${user.mobile}`}
+        menuItems={menuItems}
+        logoutAction={logoutAction}
+      />
 
       <div className="grid grid-cols-2 gap-3">
         <NavCard href="/dashboard/messages" label="Messages" icon="💬" />
