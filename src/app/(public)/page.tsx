@@ -3,6 +3,7 @@ import { getTranslations } from "@/lib/i18n";
 import { BrandHeroLockup } from "@/components/Brand";
 import { FeatureCard, StepCard, CollapsibleSection } from "@/components/ui";
 import { getRecentOpenJobs } from "@/lib/queries/jobs";
+import { countPlatformStats } from "@/lib/queries/people";
 
 const JOB_TYPE_LABEL: Record<string, { hi: string; en: string }> = {
   full_time: { hi: "पूर्णकालिक", en: "Full-time" },
@@ -12,7 +13,7 @@ const JOB_TYPE_LABEL: Record<string, { hi: string; en: string }> = {
 
 export default async function HomePage() {
   const { lang, t } = await getTranslations();
-  const recentJobs = await getRecentOpenJobs(3);
+  const [recentJobs, stats] = await Promise.all([getRecentOpenJobs(3), countPlatformStats()]);
 
   const actionTiles = [
     { href: "/login?role=seeker", icon: "📝", title: t("home_needJobTitle"), sub: t("home_needJobSub"), v: "a" },
@@ -62,6 +63,28 @@ export default async function HomePage() {
               <p className="text-[12px] sm:text-[13px] text-[var(--ink-muted)] mt-1 leading-snug">{tile.sub}</p>
             </Link>
           ))}
+        </div>
+
+        {/* Platform stats — one place showing total counts (Section 3.1, Public Website panel) */}
+        <div className="grid grid-cols-3 gap-2.5 sm:gap-3 mt-4 sm:mt-5 max-w-md mx-auto">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] py-2.5 sm:py-3">
+            <div className="text-lg sm:text-xl font-bold text-[var(--accent-ink)]">{stats.seekers}</div>
+            <div className="text-[10.5px] sm:text-[11.5px] text-[var(--ink-muted)] mt-0.5 leading-snug">
+              {t("home_statsSeekers")}
+            </div>
+          </div>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] py-2.5 sm:py-3">
+            <div className="text-lg sm:text-xl font-bold text-[var(--accent-ink)]">{stats.givers}</div>
+            <div className="text-[10.5px] sm:text-[11.5px] text-[var(--ink-muted)] mt-0.5 leading-snug">
+              {t("home_statsGivers")}
+            </div>
+          </div>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] py-2.5 sm:py-3">
+            <div className="text-lg sm:text-xl font-bold text-[var(--accent-ink)]">{stats.openJobs}</div>
+            <div className="text-[10.5px] sm:text-[11.5px] text-[var(--ink-muted)] mt-0.5 leading-snug">
+              {t("home_statsJobs")}
+            </div>
+          </div>
         </div>
       </section>
 

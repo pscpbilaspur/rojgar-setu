@@ -84,6 +84,9 @@ export const dict = {
     home_step3Sub: "Rojgar Setu नौकरी की गारंटी नहीं देता।",
     home_noJobsYet: "अभी कोई नौकरी पोस्ट नहीं हुई है।",
     home_postFirstJobCta: "सबसे पहले नौकरी पोस्ट करें →",
+    home_statsSeekers: "पंजीकृत जॉब सीकर",
+    home_statsGivers: "पंजीकृत जॉब गिवर",
+    home_statsJobs: "खुली नौकरियां",
   },
   en: {
     nav_findJobs: "Find Jobs",
@@ -162,6 +165,9 @@ export const dict = {
     home_step3Sub: "Rojgar Setu does not guarantee employment.",
     home_noJobsYet: "No jobs have been posted yet.",
     home_postFirstJobCta: "Post the first job →",
+    home_statsSeekers: "Registered Job Seekers",
+    home_statsGivers: "Registered Job Givers",
+    home_statsJobs: "Open Jobs",
   },
 } as const;
 

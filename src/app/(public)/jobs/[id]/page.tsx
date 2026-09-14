@@ -25,15 +25,30 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
         style={{ boxShadow: "var(--shadow)" }}
       >
         <h1 className="text-xl font-bold text-[var(--ink)]">{job.title}</h1>
-        <p className="text-[var(--ink-muted)] mt-1">{job.businessName}</p>
+        <p className="text-[var(--ink-muted)] mt-1">
+          <Link href={`/givers/${job.giverId}`} className="underline">{job.businessName}</Link>
+        </p>
         <p className="text-sm text-[var(--ink-faint)] mt-1">
           {job.district} · {JOB_TYPE_LABEL[job.jobType]}
           {job.salaryRange ? ` · ${job.salaryRange}` : ""}
         </p>
-        {job.qualificationOther && (
-          <p className="text-sm text-[var(--ink-muted)] mt-1">Minimum qualification: {job.qualificationOther}</p>
+        {job.qualification && (
+          <p className="text-sm text-[var(--ink-muted)] mt-1">Minimum qualification: {job.qualification}</p>
         )}
         <p className="mt-4 whitespace-pre-line text-[var(--ink)]">{job.description}</p>
+
+        {job.skills.length > 0 && (
+          <>
+            <div className="text-sm font-semibold text-[var(--ink)] mt-4">Skills required</div>
+            <div className="flex flex-wrap gap-1.5 mt-1.5">
+              {job.skills.map((s) => (
+                <span key={s} className="text-xs bg-[var(--accent-soft)] text-[var(--accent-ink)] px-2 py-1 rounded-full">
+                  {s}
+                </span>
+              ))}
+            </div>
+          </>
+        )}
 
         <div className="mt-6">
           {!current ? (

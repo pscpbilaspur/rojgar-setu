@@ -24,11 +24,24 @@ export default async function SeekerProfilePage({ params }: { params: Promise<{ 
         <h1 className="text-xl font-bold text-[var(--ink)]">{profile.name}</h1>
         <p className="text-[var(--ink-muted)] mt-1">{profile.qualification ?? "—"}</p>
         <p className="text-sm text-[var(--ink-faint)] mt-1">
-          {profile.district} · {JOB_TYPE_LABEL[profile.jobType]}
+          Hometown: {profile.district} · {JOB_TYPE_LABEL[profile.jobType]}
           {profile.expectedSalary ? ` · ${profile.expectedSalary}` : ""}
         </p>
         {profile.verificationPending && (
           <p className="text-sm text-[var(--warn)] mt-2">Basic verification not yet done</p>
+        )}
+
+        {profile.preferredDistricts.length > 0 && (
+          <>
+            <div className="text-sm font-semibold text-[var(--ink)] mt-4">Available to work in</div>
+            <div className="flex flex-wrap gap-1.5 mt-1.5">
+              {profile.preferredDistricts.map((d) => (
+                <span key={d} className="text-xs bg-[var(--accent2-soft)] text-[var(--ink)] px-2 py-1 rounded-full">
+                  {d}
+                </span>
+              ))}
+            </div>
+          </>
         )}
 
         {profile.experience && (

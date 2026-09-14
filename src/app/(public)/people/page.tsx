@@ -60,6 +60,11 @@ export default async function PeoplePage({
               <p className="text-xs text-[var(--ink-faint)] mt-2">
                 {p.district} · {JOB_TYPE_LABEL[p.jobType]}
               </p>
+              {p.preferredDistricts.length > 0 && (
+                <p className="text-xs text-[var(--ink-faint)] mt-1">
+                  Available in: {p.preferredDistricts.join(", ")}
+                </p>
+              )}
               {p.verificationPending && (
                 <p className="text-xs text-[var(--warn)] mt-1">Basic verification not yet done</p>
               )}

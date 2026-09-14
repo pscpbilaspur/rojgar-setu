@@ -1,10 +1,11 @@
 import "server-only";
-import { and, eq, desc, sql } from "drizzle-orm";
+import { and, eq, desc, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   jobSeekerProfiles,
   jobGiverProfiles,
   jobSeekerSkills,
+  seekerLocationPreferences,
   skills,
   qualifications,
   locations,
@@ -30,12 +31,30 @@ export type SeekerListRow = {
   qualification: string | null;
   jobType: string;
   district: string;
+  preferredDistricts: string[];
   verificationPending: boolean;
 };
 
+/** `filters.districtId` matches a Job Giver's actual question — "who is
+ * available to work in MY district?" — so it checks the seeker's *preferred*
+ * work locations (seekerLocationPreferences), not just their hometown.
+ * Hometown alone would silently hide someone who lives elsewhere but is
+ * willing to work in this district, which defeats the point of the
+ * preferred-locations field (Section 4.4/4.6 — location is the discovery
+ * dimension). Hometown is still shown on the card for context. */
 export async function browseSeekers(filters: { districtId?: number; qualificationId?: number; jobType?: string } = {}) {
   const conditions = [];
-  if (filters.districtId) conditions.push(eq(jobSeekerProfiles.hometownDistrictId, filters.districtId));
+  if (filters.districtId) {
+    conditions.push(
+      inArray(
+        jobSeekerProfiles.id,
+        db
+          .select({ id: seekerLocationPreferences.seekerId })
+          .from(seekerLocationPreferences)
+          .where(eq(seekerLocationPreferences.locationId, filters.districtId))
+      )
+    );
+  }
   if (filters.qualificationId) conditions.push(eq(jobSeekerProfiles.qualificationId, filters.qualificationId));
   if (filters.jobType) conditions.push(eq(jobSeekerProfiles.jobType, filters.jobType));
 
@@ -55,14 +74,34 @@ export async function browseSeekers(filters: { districtId?: number; qualificatio
     .where(conditions.length ? and(...conditions) : undefined)
     .orderBy(desc(jobSeekerProfiles.createdAt));
 
+  const seekerIds = rows.map((r) => r.id);
+  const preferredByseeker = await fetchPreferredDistricts(seekerIds);
+
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
     qualification: r.qualification ?? r.qualificationOther,
     jobType: r.jobType,
     district: r.district,
+    preferredDistricts: preferredByseeker.get(r.id) ?? [],
     verificationPending: r.verificationStatus === "not_yet_done",
   }));
+}
+
+async function fetchPreferredDistricts(seekerIds: number[]): Promise<Map<number, string[]>> {
+  const map = new Map<number, string[]>();
+  if (seekerIds.length === 0) return map;
+  const rows = await db
+    .select({ seekerId: seekerLocationPreferences.seekerId, district: locations.district })
+    .from(seekerLocationPreferences)
+    .innerJoin(locations, eq(seekerLocationPreferences.locationId, locations.id))
+    .where(inArray(seekerLocationPreferences.seekerId, seekerIds));
+  for (const r of rows) {
+    const list = map.get(r.seekerId) ?? [];
+    list.push(r.district);
+    map.set(r.seekerId, list);
+  }
+  return map;
 }
 
 export async function getSeekerPublicProfile(id: number, isLoggedIn: boolean) {
@@ -95,6 +134,12 @@ export async function getSeekerPublicProfile(id: number, isLoggedIn: boolean) {
     .innerJoin(skills, eq(jobSeekerSkills.skillId, skills.id))
     .where(eq(jobSeekerSkills.seekerId, id));
 
+  const preferredRows = await db
+    .select({ district: locations.district })
+    .from(seekerLocationPreferences)
+    .innerJoin(locations, eq(seekerLocationPreferences.locationId, locations.id))
+    .where(eq(seekerLocationPreferences.seekerId, id));
+
   return {
     id: profile.id,
     userId: profile.userId,
@@ -104,6 +149,7 @@ export async function getSeekerPublicProfile(id: number, isLoggedIn: boolean) {
     jobType: profile.jobType,
     district: profile.district,
     skills: skillRows.map((s) => s.label),
+    preferredDistricts: preferredRows.map((p) => p.district),
     expectedSalary: isLoggedIn ? profile.expectedSalary : null,
     verificationPending: profile.verificationStatus === "not_yet_done",
     mobile: isLoggedIn && profile.contactSharePolicy === "always" ? profile.mobile : null,

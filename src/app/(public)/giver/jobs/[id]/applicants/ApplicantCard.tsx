@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { decideApplicationAction } from "@/app/actions/jobs";
 import type { ApplicantRow } from "@/lib/queries/applicants";
@@ -22,14 +23,18 @@ export function ApplicantCard({ applicant }: { applicant: ApplicantRow }) {
     >
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-semibold text-[var(--ink)]">{applicant.seekerName}</h3>
-          <p className="text-sm text-[var(--ink-muted)]">Father&apos;s name: {applicant.fatherName}</p>
+          <Link href={`/people/${applicant.seekerId}`} className="font-semibold text-[var(--ink)] underline">
+            {applicant.seekerName}
+          </Link>
           <p className="text-sm text-[var(--ink-muted)]">
             {applicant.mobile ? `Mobile: ${applicant.mobile}` : "Mobile: not shared by user"}
           </p>
           <p className="text-xs text-[var(--ink-faint)] mt-1">
             Expected salary: {applicant.expectedSalary ?? "-"} · Verification: {applicant.verificationStatus}
           </p>
+          <Link href={`/people/${applicant.seekerId}`} className="text-xs underline text-[var(--accent-ink)] inline-block mt-1">
+            View full profile
+          </Link>
         </div>
         <span
           className={`text-xs px-2 py-1 rounded-full ${

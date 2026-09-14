@@ -6,8 +6,8 @@ import { applications, jobSeekerProfiles, users, jobs } from "@/db/schema";
 export type ApplicantRow = {
   applicationId: number;
   status: string;
+  seekerId: number;
   seekerName: string;
-  fatherName: string;
   jobType: string;
   expectedSalary: string | null;
   verificationStatus: string;
@@ -27,8 +27,8 @@ export async function getApplicantsForJob(jobId: number, giverId: number): Promi
     .select({
       applicationId: applications.id,
       status: applications.status,
+      seekerId: jobSeekerProfiles.id,
       seekerName: jobSeekerProfiles.name,
-      fatherName: jobSeekerProfiles.fatherName,
       jobType: jobSeekerProfiles.jobType,
       expectedSalary: jobSeekerProfiles.expectedSalary,
       verificationStatus: jobSeekerProfiles.verificationStatus,
@@ -45,8 +45,8 @@ export async function getApplicantsForJob(jobId: number, giverId: number): Promi
   return rows.map((r) => ({
     applicationId: r.applicationId,
     status: r.status,
+    seekerId: r.seekerId,
     seekerName: r.seekerName,
-    fatherName: r.fatherName,
     jobType: r.jobType,
     expectedSalary: r.expectedSalary,
     verificationStatus: r.verificationStatus,
