@@ -13,10 +13,9 @@ const JOB_TYPE_LABEL: Record<string, string> = {
 
 export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const job = await getJobDetail(Number(id));
-  if (!job) notFound();
-
   const current = await getCurrentUser();
+  const job = await getJobDetail(Number(id), current?.seekerProfile?.id);
+  if (!job) notFound();
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -55,6 +54,8 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
               You need a Job Seeker profile to apply.{" "}
               <Link href="/onboarding/seeker" className="underline">Create one</Link>
             </p>
+          ) : job.alreadyApplied ? (
+            <p className="text-[var(--ok)] font-medium">✓ You've already applied to this job.</p>
           ) : (
             <ApplyButton jobId={job.id} />
           )}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { browseSeekers } from "@/lib/queries/people";
 import { getAllDistricts } from "@/lib/queries/lookups";
+import { getCurrentUser } from "@/lib/dal";
 
 const JOB_TYPE_LABEL: Record<string, string> = {
   full_time: "Full-time",
@@ -17,8 +18,10 @@ export default async function PeoplePage({
   const districtId = params.district ? Number(params.district) : undefined;
   const jobType = params.type || undefined;
 
+  const current = await getCurrentUser();
+  const viewer = current?.giverProfile ? { giverId: current.giverProfile.id, giverUserId: current.user.id } : undefined;
   const [people, districts] = await Promise.all([
-    browseSeekers({ districtId, jobType }),
+    browseSeekers({ districtId, jobType }, viewer),
     getAllDistricts(),
   ]);
 
@@ -55,7 +58,14 @@ export default async function PeoplePage({
               className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4"
               style={{ boxShadow: "var(--shadow)" }}
             >
-              <h3 className="font-semibold text-[var(--ink)]">{p.name}</h3>
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-semibold text-[var(--ink)]">{p.name}</h3>
+                {(p.alreadyApplied || p.alreadyContacted) && (
+                  <span className="shrink-0 text-[11px] font-medium text-[var(--ok)] bg-[var(--ok-soft)] px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                    {p.alreadyApplied ? "✓ Applied" : "✓ Messaged you"}
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-[var(--ink-muted)] mt-0.5">{p.qualification ?? "—"}</p>
               <p className="text-xs text-[var(--ink-faint)] mt-2">
                 {p.district} · {JOB_TYPE_LABEL[p.jobType]}

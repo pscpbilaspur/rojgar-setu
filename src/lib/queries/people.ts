@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, desc, inArray, sql } from "drizzle-orm";
+import { and, eq, desc, inArray, ne, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   jobSeekerProfiles,
@@ -11,6 +11,8 @@ import {
   locations,
   users,
   jobs,
+  applications,
+  chatParticipants,
 } from "@/db/schema";
 
 // ---------------------------------------------------------------------------
@@ -33,6 +35,13 @@ export type SeekerListRow = {
   district: string;
   preferredDistricts: string[];
   verificationPending: boolean;
+  // Only ever true when browseSeekers was called with `viewer` (a logged-in
+  // Giver) — a quick "you've already crossed paths" signal so a Giver
+  // scrolling the People list can tell at a glance who has already applied
+  // to one of their jobs, or already messaged them, instead of finding out
+  // again by re-opening each profile.
+  alreadyApplied: boolean;
+  alreadyContacted: boolean;
 };
 
 /** `filters.districtId` matches a Job Giver's actual question — "who is
@@ -41,8 +50,17 @@ export type SeekerListRow = {
  * Hometown alone would silently hide someone who lives elsewhere but is
  * willing to work in this district, which defeats the point of the
  * preferred-locations field (Section 4.4/4.6 — location is the discovery
- * dimension). Hometown is still shown on the card for context. */
-export async function browseSeekers(filters: { districtId?: number; qualificationId?: number; jobType?: string } = {}) {
+ * dimension). Hometown is still shown on the card for context.
+ *
+ * `viewer`, when passed (the logged-in Giver's own profile id + user id),
+ * additionally marks each seeker who has already applied to one of this
+ * Giver's jobs (`alreadyApplied`) or already started a chat with this
+ * Giver (`alreadyContacted` — only Seekers can initiate a chat, so a shared
+ * thread always means the Seeker reached out first). */
+export async function browseSeekers(
+  filters: { districtId?: number; qualificationId?: number; jobType?: string } = {},
+  viewer?: { giverId: number; giverUserId: number }
+) {
   const conditions = [];
   if (filters.districtId) {
     conditions.push(
@@ -77,6 +95,27 @@ export async function browseSeekers(filters: { districtId?: number; qualificatio
   const seekerIds = rows.map((r) => r.id);
   const preferredByseeker = await fetchPreferredDistricts(seekerIds);
 
+  let appliedSeekerIds = new Set<number>();
+  let contactedSeekerIds = new Set<number>();
+  if (viewer && seekerIds.length > 0) {
+    const [appliedRows, contactedUserIds] = await Promise.all([
+      db
+        .select({ seekerId: applications.seekerId })
+        .from(applications)
+        .innerJoin(jobs, eq(applications.jobId, jobs.id))
+        .where(and(eq(jobs.giverId, viewer.giverId), inArray(applications.seekerId, seekerIds))),
+      fetchContactedUserIds(viewer.giverUserId),
+    ]);
+    appliedSeekerIds = new Set(appliedRows.map((r) => r.seekerId));
+    if (contactedUserIds.length > 0) {
+      const contactedRows = await db
+        .select({ id: jobSeekerProfiles.id })
+        .from(jobSeekerProfiles)
+        .where(and(inArray(jobSeekerProfiles.userId, contactedUserIds), inArray(jobSeekerProfiles.id, seekerIds)));
+      contactedSeekerIds = new Set(contactedRows.map((r) => r.id));
+    }
+  }
+
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
@@ -85,7 +124,27 @@ export async function browseSeekers(filters: { districtId?: number; qualificatio
     district: r.district,
     preferredDistricts: preferredByseeker.get(r.id) ?? [],
     verificationPending: r.verificationStatus === "not_yet_done",
+    alreadyApplied: appliedSeekerIds.has(r.id),
+    alreadyContacted: contactedSeekerIds.has(r.id),
   }));
+}
+
+/** userIds of everyone who shares a chat thread with `giverUserId` — since
+ * only a Seeker can ever start a chat (startChatAction requires a Seeker
+ * profile), any such thread means that other person messaged this Giver
+ * first, not the other way round. */
+async function fetchContactedUserIds(giverUserId: number): Promise<number[]> {
+  const giverThreads = await db
+    .select({ threadId: chatParticipants.threadId })
+    .from(chatParticipants)
+    .where(eq(chatParticipants.userId, giverUserId));
+  const threadIds = giverThreads.map((t) => t.threadId);
+  if (threadIds.length === 0) return [];
+  const others = await db
+    .select({ userId: chatParticipants.userId })
+    .from(chatParticipants)
+    .where(and(inArray(chatParticipants.threadId, threadIds), ne(chatParticipants.userId, giverUserId)));
+  return others.map((o) => o.userId);
 }
 
 async function fetchPreferredDistricts(seekerIds: number[]): Promise<Map<number, string[]>> {

@@ -172,6 +172,11 @@ export default async function HomePage() {
               ))}
             </div>
           )}
+          <div className="text-center mt-4">
+            <Link href="/jobs" className="text-[13px] font-medium text-[var(--accent-ink)] underline underline-offset-2">
+              {t("home_viewAllJobsCta")}
+            </Link>
+          </div>
         </CollapsibleSection>
       </section>
     </div>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "@/lib/i18n";
 import { getCurrentUser } from "@/lib/dal";
-import { BrandHeaderLockup } from "@/components/Brand";
+import { HeaderBrand } from "@/components/HeaderBrand";
 import { LangSwitch } from "@/components/LangSwitch";
 
 export async function SiteHeader() {
@@ -20,9 +20,7 @@ export async function SiteHeader() {
   return (
     <header className="border-b border-[var(--border)] bg-[var(--surface)]">
       <div className="max-w-5xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
-        <Link href="/" className="min-w-0">
-          <BrandHeaderLockup />
-        </Link>
+        <HeaderBrand />
         <nav className="flex items-center gap-2 sm:gap-4 text-sm shrink-0">
           <Link href="/jobs" className="hidden sm:inline text-[var(--ink-muted)] hover:text-[var(--ink)]">
             {t("nav_findJobs")}

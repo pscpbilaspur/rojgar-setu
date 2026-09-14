@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { browseOpenJobs } from "@/lib/queries/jobs-browse";
 import { getAllDistricts } from "@/lib/queries/lookups";
+import { getCurrentUser } from "@/lib/dal";
 
 const JOB_TYPE_LABEL: Record<string, string> = {
   full_time: "Full-time",
@@ -17,8 +18,9 @@ export default async function JobsPage({
   const districtId = params.district ? Number(params.district) : undefined;
   const jobType = params.type || undefined;
 
+  const current = await getCurrentUser();
   const [jobsList, districts] = await Promise.all([
-    browseOpenJobs({ districtId, jobType }),
+    browseOpenJobs({ districtId, jobType }, current?.seekerProfile?.id),
     getAllDistricts(),
   ]);
 
@@ -55,7 +57,14 @@ export default async function JobsPage({
               className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4"
               style={{ boxShadow: "var(--shadow)" }}
             >
-              <h3 className="font-semibold text-[var(--ink)]">{job.title}</h3>
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-semibold text-[var(--ink)]">{job.title}</h3>
+                {job.alreadyApplied && (
+                  <span className="shrink-0 text-[11px] font-medium text-[var(--ok)] bg-[var(--ok-soft)] px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                    ✓ Applied
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-[var(--ink-muted)] mt-0.5">{job.businessName}</p>
               <p className="text-xs text-[var(--ink-faint)] mt-2">
                 {job.district} · {JOB_TYPE_LABEL[job.jobType]}

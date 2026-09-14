@@ -1,14 +1,17 @@
 import "server-only";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
-import { jobs, jobGiverProfiles, jobSkills, skills, qualifications, locations } from "@/db/schema";
+import { jobs, jobGiverProfiles, jobSkills, skills, qualifications, locations, applications } from "@/db/schema";
 
-export async function browseOpenJobs(filters: { districtId?: number; jobType?: string } = {}) {
+/** `viewerSeekerId`, when passed, marks each job the logged-in Seeker has
+ * already applied to (`alreadyApplied`) — so the same job doesn't just show
+ * a plain "Apply" invite again once they've already sent one. */
+export async function browseOpenJobs(filters: { districtId?: number; jobType?: string } = {}, viewerSeekerId?: number) {
   const conditions = [eq(jobs.status, "open"), eq(jobs.moderationState, "approved")];
   if (filters.districtId) conditions.push(eq(jobs.locationId, filters.districtId));
   if (filters.jobType) conditions.push(eq(jobs.jobType, filters.jobType));
 
-  return db
+  const rows = await db
     .select({
       id: jobs.id,
       title: jobs.title,
@@ -24,9 +27,32 @@ export async function browseOpenJobs(filters: { districtId?: number; jobType?: s
     .innerJoin(locations, eq(jobs.locationId, locations.id))
     .where(and(...conditions))
     .orderBy(desc(jobs.createdAt));
+
+  let appliedJobIds = new Set<number>();
+  if (viewerSeekerId && rows.length > 0) {
+    const applied = await db
+      .select({ jobId: applications.jobId })
+      .from(applications)
+      .where(
+        and(
+          eq(applications.seekerId, viewerSeekerId),
+          inArray(
+            applications.jobId,
+            rows.map((r) => r.id)
+          )
+        )
+      );
+    appliedJobIds = new Set(applied.map((a) => a.jobId));
+  }
+
+  return rows.map((r) => ({ ...r, alreadyApplied: appliedJobIds.has(r.id) }));
 }
 
-export async function getJobDetail(jobId: number) {
+/** `viewerSeekerId`, when passed, marks whether that Seeker has already
+ * applied to this job (`alreadyApplied`) — so revisiting the job detail
+ * page after applying shows that state instead of a plain "Apply" button
+ * that would just error ("You have already applied") on click. */
+export async function getJobDetail(jobId: number, viewerSeekerId?: number) {
   const [row] = await db
     .select({
       id: jobs.id,
@@ -62,6 +88,15 @@ export async function getJobDetail(jobId: number) {
     if (skillRows.length > 0) skillsDisplay = skillRows.map((s) => s.label).join(", ");
   }
 
+  let alreadyApplied = false;
+  if (viewerSeekerId) {
+    const [existing] = await db
+      .select({ id: applications.id })
+      .from(applications)
+      .where(and(eq(applications.jobId, jobId), eq(applications.seekerId, viewerSeekerId)));
+    alreadyApplied = Boolean(existing);
+  }
+
   return {
     ...row,
     // A job can specify qualification via the preset dropdown (qualification)
@@ -69,5 +104,6 @@ export async function getJobDetail(jobId: number) {
     // so show whichever is set (Section 4.5: this field is optional).
     qualification: row.qualification ?? row.qualificationOther,
     skills: skillsDisplay,
+    alreadyApplied,
   };
 }
