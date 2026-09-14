@@ -1,17 +1,15 @@
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/dal";
-import { getAllDistricts, getQualifications, getSkills, getSeekerSkillIds, getSeekerLocationIds } from "@/lib/queries/lookups";
+import { getAllDistricts, getQualifications, getSeekerLocationIds } from "@/lib/queries/lookups";
 import { EditSeekerForm } from "./EditSeekerForm";
 
 export default async function SeekerProfilePage() {
   const { seekerProfile } = await requireUser();
   if (!seekerProfile) redirect("/onboarding/seeker");
 
-  const [districts, qualifications, skills, skillIds, locationIds] = await Promise.all([
+  const [districts, qualifications, locationIds] = await Promise.all([
     getAllDistricts(),
     getQualifications(),
-    getSkills(),
-    getSeekerSkillIds(seekerProfile.id),
     getSeekerLocationIds(seekerProfile.id),
   ]);
 
@@ -25,7 +23,6 @@ export default async function SeekerProfilePage() {
         <EditSeekerForm
           districts={districts}
           qualifications={qualifications}
-          initialSkills={skills}
           profile={{
             name: seekerProfile.name,
             fatherName: seekerProfile.fatherName,
@@ -35,7 +32,8 @@ export default async function SeekerProfilePage() {
             experience: seekerProfile.experience,
             expectedSalary: seekerProfile.expectedSalary,
             jobType: seekerProfile.jobType as "full_time" | "part_time" | "wfh",
-            skillIds,
+            skillsText: seekerProfile.skillsText,
+            additionalNote: seekerProfile.additionalNote,
             preferredLocationIds: locationIds,
           }}
         />

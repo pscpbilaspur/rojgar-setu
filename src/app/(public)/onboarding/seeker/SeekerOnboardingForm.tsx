@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { createSeekerProfileAction } from "@/app/actions/seeker";
-import { ensureSkillAction, getApproversForDistrictAction } from "@/app/actions/lookups";
+import { getApproversForDistrictAction } from "@/app/actions/lookups";
 
 type Lookup = { id: number; label?: string; district?: string; state?: string; isRemote?: boolean };
 type Approver = { id: number; name: string };
@@ -10,11 +10,9 @@ type Approver = { id: number; name: string };
 export function SeekerOnboardingForm({
   districts,
   qualifications,
-  initialSkills,
 }: {
   districts: { id: number; district: string; state: string; isRemote: boolean }[];
   qualifications: Lookup[];
-  initialSkills: Lookup[];
 }) {
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
@@ -28,9 +26,8 @@ export function SeekerOnboardingForm({
   // Step 2
   const [qualificationId, setQualificationId] = useState<number | "">("");
   const [qualificationOther, setQualificationOther] = useState("");
-  const [skillList, setSkillList] = useState(initialSkills);
-  const [selectedSkillIds, setSelectedSkillIds] = useState<number[]>([]);
-  const [customSkill, setCustomSkill] = useState("");
+  const [skillsText, setSkillsText] = useState("");
+  const [additionalNote, setAdditionalNote] = useState("");
   const [experience, setExperience] = useState("");
   const [expectedSalary, setExpectedSalary] = useState("");
 
@@ -58,23 +55,8 @@ export function SeekerOnboardingForm({
     [realDistricts, hometownState]
   );
 
-  function toggleSkill(id: number) {
-    setSelectedSkillIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  }
-
   function toggleLocation(id: number) {
     setPreferredLocationIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  }
-
-  async function addCustomSkill() {
-    const label = customSkill.trim();
-    if (!label) return;
-    const created = await ensureSkillAction(label);
-    if (created && !skillList.some((s) => s.id === created.id)) {
-      setSkillList((prev) => [...prev, created]);
-      setSelectedSkillIds((prev) => [...prev, created.id]);
-    }
-    setCustomSkill("");
   }
 
   async function goToStep4() {
@@ -102,7 +84,8 @@ export function SeekerOnboardingForm({
         // positive id); qualificationOther carries the actual free-text value.
         qualificationId: qualificationId && qualificationId !== -1 ? Number(qualificationId) : undefined,
         qualificationOther: qualificationOther || undefined,
-        skillIds: selectedSkillIds,
+        skillsText: skillsText || undefined,
+        additionalNote: additionalNote || undefined,
         experience: experience || undefined,
         expectedSalary: expectedSalary || undefined,
         jobType,
@@ -194,37 +177,26 @@ export function SeekerOnboardingForm({
               className={inputCls}
             />
           )}
-          <Field label="Skills">
-            <div className="flex flex-wrap gap-2">
-              {skillList.map((s) => (
-                <button
-                  type="button"
-                  key={s.id}
-                  onClick={() => toggleSkill(s.id)}
-                  className={`text-sm px-3 py-1.5 rounded-full border ${
-                    selectedSkillIds.includes(s.id)
-                      ? "bg-[var(--accent-soft)] border-[var(--accent)] text-[var(--accent-ink)]"
-                      : "border-[var(--border)] text-[var(--ink-muted)]"
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-            <div className="flex gap-2 mt-2">
-              <input
-                placeholder="Add your own skill"
-                value={customSkill}
-                onChange={(e) => setCustomSkill(e.target.value)}
-                className={inputCls}
-              />
-              <button type="button" onClick={addCustomSkill} className="px-3 py-2 border border-[var(--border)] rounded-md text-sm">
-                Add
-              </button>
-            </div>
+          <Field label="Your skills (optional)">
+            <textarea
+              value={skillsText}
+              onChange={(e) => setSkillsText(e.target.value)}
+              rows={2}
+              placeholder="e.g. Driving, tailoring, computer basics, cooking..."
+              className={inputCls}
+            />
           </Field>
           <Field label="Experience">
             <textarea value={experience} onChange={(e) => setExperience(e.target.value)} className={inputCls} rows={2} />
+          </Field>
+          <Field label="Anything else you'd like employers to know? (optional)">
+            <textarea
+              value={additionalNote}
+              onChange={(e) => setAdditionalNote(e.target.value)}
+              rows={2}
+              placeholder="Anything not covered above..."
+              className={inputCls}
+            />
           </Field>
           <Field label="Expected salary">
             <input value={expectedSalary} onChange={(e) => setExpectedSalary(e.target.value)} className={inputCls} />
@@ -280,6 +252,11 @@ export function SeekerOnboardingForm({
       {step === 4 && (
         <div className="space-y-3">
           <Field label="Select an Approver in your district">
+            <p className="text-xs text-[var(--ink-muted)] mb-2">
+              An Approver personally vouches for real people, to keep fake profiles off the platform — so pick
+              someone here only if they'd actually recognize you or your work, like a known community member,
+              local shopkeeper, or someone from your panchayat.
+            </p>
             {approversLoading ? (
               <p className="text-sm text-[var(--ink-muted)]">Loading...</p>
             ) : approvers.length === 0 ? (
@@ -301,7 +278,7 @@ export function SeekerOnboardingForm({
                   ))}
                 </select>
                 <p className="text-xs text-[var(--ink-faint)] mt-1">
-                  Pick someone who personally knows you or your work. Optional — you can also do this later.
+                  Only pick someone who personally knows you or your work. Optional — you can also do this later.
                 </p>
               </>
             )}

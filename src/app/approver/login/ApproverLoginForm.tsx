@@ -47,6 +47,7 @@ export function ApproverLoginForm() {
             inputMode="numeric"
             maxLength={10}
             required
+            defaultValue={mobile}
             className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-[var(--ink)]"
           />
         </div>
@@ -64,7 +65,12 @@ export function ApproverLoginForm() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-[var(--ink-muted)]">{mobile}</p>
+      <p className="text-sm text-[var(--ink-muted)]">
+        {mobile} ·{" "}
+        <button type="button" onClick={() => setStage("mobile")} className="underline">
+          Change number
+        </button>
+      </p>
       <input
         type="text"
         inputMode="numeric"
@@ -82,6 +88,12 @@ export function ApproverLoginForm() {
       >
         Verify
       </button>
+      <form action={requestAction}>
+        <input type="hidden" name="mobile" value={mobile} />
+        <button type="submit" className="text-sm underline text-[var(--ink-muted)]">
+          Resend
+        </button>
+      </form>
     </div>
   );
 }

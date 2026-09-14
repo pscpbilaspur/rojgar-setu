@@ -71,6 +71,7 @@ export function LoginForm({
             maxLength={10}
             placeholder="9876543210"
             required
+            defaultValue={mobile}
             className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-[var(--ink)]"
           />
         </div>

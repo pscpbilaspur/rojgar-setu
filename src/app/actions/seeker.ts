@@ -8,7 +8,6 @@ import { db } from "@/db";
 import {
   jobSeekerProfiles,
   seekerLocationPreferences,
-  jobSeekerSkills,
   verificationRequests,
 } from "@/db/schema";
 import { requireUser } from "@/lib/dal";
@@ -19,7 +18,8 @@ const seekerSchema = z.object({
   hometownDistrictId: z.coerce.number().int().positive(),
   qualificationId: z.coerce.number().int().positive().optional(),
   qualificationOther: z.string().trim().max(150).optional(),
-  skillIds: z.array(z.coerce.number().int().positive()).default([]),
+  skillsText: z.string().trim().max(500).optional(),
+  additionalNote: z.string().trim().max(1000).optional(),
   experience: z.string().trim().max(2000).optional(),
   expectedSalary: z.string().trim().max(60).optional(),
   jobType: z.enum(["full_time", "part_time", "wfh"]),
@@ -38,9 +38,19 @@ export type SeekerSubmitResult = { error: string } | { success: true };
 export async function createSeekerProfileAction(
   input: SeekerFormInput
 ): Promise<SeekerSubmitResult> {
-  const { user, seekerProfile } = await requireUser();
+  const { user, seekerProfile, giverProfile } = await requireUser();
   if (seekerProfile) {
     return { error: "You already have a Job Seeker profile." };
+  }
+  // One role per account — an account already registered as a Job Giver
+  // can't also become a Job Seeker. Never trust the client for this: the
+  // onboarding page already explains and blocks this before the form is
+  // even shown, but the check has to hold here too.
+  if (giverProfile) {
+    return {
+      error:
+        "This account is already registered as a Job Giver. An account can only be a Job Seeker or a Job Giver, not both.",
+    };
   }
 
   const parsed = seekerSchema.safeParse(input);
@@ -59,6 +69,8 @@ export async function createSeekerProfileAction(
         hometownDistrictId: data.hometownDistrictId,
         qualificationId: data.qualificationId,
         qualificationOther: data.qualificationOther,
+        skillsText: data.skillsText,
+        additionalNote: data.additionalNote,
         experience: data.experience,
         expectedSalary: data.expectedSalary,
         jobType: data.jobType,
@@ -70,12 +82,6 @@ export async function createSeekerProfileAction(
         contactSharePolicy: data.contactSharePolicy,
       })
       .returning();
-
-    if (data.skillIds.length > 0) {
-      await tx.insert(jobSeekerSkills).values(
-        data.skillIds.map((skillId) => ({ seekerId: profile.id, skillId }))
-      );
-    }
 
     await tx.insert(seekerLocationPreferences).values(
       data.preferredLocationIds.map((locationId) => ({
@@ -103,7 +109,8 @@ const editSeekerSchema = z.object({
   hometownDistrictId: z.coerce.number().int().positive(),
   qualificationId: z.coerce.number().int().positive().optional(),
   qualificationOther: z.string().trim().max(150).optional(),
-  skillIds: z.array(z.coerce.number().int().positive()).default([]),
+  skillsText: z.string().trim().max(500).optional(),
+  additionalNote: z.string().trim().max(1000).optional(),
   experience: z.string().trim().max(2000).optional(),
   expectedSalary: z.string().trim().max(60).optional(),
   jobType: z.enum(["full_time", "part_time", "wfh"]),
@@ -133,19 +140,14 @@ export async function updateSeekerProfileAction(input: EditSeekerInput): Promise
         hometownDistrictId: data.hometownDistrictId,
         qualificationId: data.qualificationId,
         qualificationOther: data.qualificationOther,
+        skillsText: data.skillsText,
+        additionalNote: data.additionalNote,
         experience: data.experience,
         expectedSalary: data.expectedSalary,
         jobType: data.jobType,
         updatedAt: new Date(),
       })
       .where(eq(jobSeekerProfiles.id, seekerProfile.id));
-
-    await tx.delete(jobSeekerSkills).where(eq(jobSeekerSkills.seekerId, seekerProfile.id));
-    if (data.skillIds.length > 0) {
-      await tx.insert(jobSeekerSkills).values(
-        data.skillIds.map((skillId) => ({ seekerId: seekerProfile.id, skillId }))
-      );
-    }
 
     await tx.delete(seekerLocationPreferences).where(eq(seekerLocationPreferences.seekerId, seekerProfile.id));
     await tx.insert(seekerLocationPreferences).values(

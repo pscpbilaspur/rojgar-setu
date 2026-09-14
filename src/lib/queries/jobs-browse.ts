@@ -36,6 +36,7 @@ export async function getJobDetail(jobId: number) {
       salaryRange: jobs.salaryRange,
       qualification: qualifications.label,
       qualificationOther: jobs.qualificationOther,
+      skillsNote: jobs.skillsNote,
       status: jobs.status,
       giverId: jobs.giverId,
       businessName: jobGiverProfiles.businessName,
@@ -48,11 +49,18 @@ export async function getJobDetail(jobId: number) {
     .where(eq(jobs.id, jobId));
   if (!row) return null;
 
-  const skillRows = await db
-    .select({ label: skills.label })
-    .from(jobSkills)
-    .innerJoin(skills, eq(jobSkills.skillId, skills.id))
-    .where(eq(jobSkills.jobId, jobId));
+  // The Giver's own free-typed skills/requirements note (current). Older
+  // jobs posted before this changed fall back to a comma-joined list from
+  // the structured jobSkills table, so nothing already posted disappears.
+  let skillsDisplay = row.skillsNote;
+  if (!skillsDisplay) {
+    const skillRows = await db
+      .select({ label: skills.label })
+      .from(jobSkills)
+      .innerJoin(skills, eq(jobSkills.skillId, skills.id))
+      .where(eq(jobSkills.jobId, jobId));
+    if (skillRows.length > 0) skillsDisplay = skillRows.map((s) => s.label).join(", ");
+  }
 
   return {
     ...row,
@@ -60,6 +68,6 @@ export async function getJobDetail(jobId: number) {
     // or free-text "Other" (qualificationOther) — never both meaningfully,
     // so show whichever is set (Section 4.5: this field is optional).
     qualification: row.qualification ?? row.qualificationOther,
-    skills: skillRows.map((s) => s.label),
+    skills: skillsDisplay,
   };
 }

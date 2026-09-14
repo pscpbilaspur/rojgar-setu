@@ -36,7 +36,7 @@ export default async function GiverProfilePage({ params }: { params: Promise<{ i
           </p>
         )}
 
-        {current && current.user.id !== profile.userId && (
+        {current && current.user.id !== profile.userId && current.seekerProfile && (
           <div className="mt-4">
             <MessageButton otherUserId={profile.userId} />
           </div>

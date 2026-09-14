@@ -12,9 +12,13 @@ export default async function OnboardingPage({
 }: {
   searchParams: Promise<{ role?: string }>;
 }) {
-  const { user } = await requireUser();
+  const { user, seekerProfile, giverProfile } = await requireUser();
   const { t } = await getTranslations();
   const { role } = await searchParams;
+
+  // Already has a profile (of either kind) — nothing to choose, and one
+  // role per account means they can't pick the other one from here either.
+  if (seekerProfile || giverProfile) redirect("/dashboard");
 
   // Came here from the homepage's "I'm looking for work" / "I want to hire"
   // tile (via /login?role=...) — skip the choice screen and go straight to

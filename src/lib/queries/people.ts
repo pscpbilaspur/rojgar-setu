@@ -112,6 +112,8 @@ export async function getSeekerPublicProfile(id: number, isLoggedIn: boolean) {
       qualification: qualifications.label,
       qualificationOther: jobSeekerProfiles.qualificationOther,
       experience: jobSeekerProfiles.experience,
+      skillsText: jobSeekerProfiles.skillsText,
+      additionalNote: jobSeekerProfiles.additionalNote,
       expectedSalary: jobSeekerProfiles.expectedSalary,
       jobType: jobSeekerProfiles.jobType,
       district: locations.district,
@@ -128,11 +130,19 @@ export async function getSeekerPublicProfile(id: number, isLoggedIn: boolean) {
 
   if (!profile) return null;
 
-  const skillRows = await db
-    .select({ label: skills.label })
-    .from(jobSeekerSkills)
-    .innerJoin(skills, eq(jobSeekerSkills.skillId, skills.id))
-    .where(eq(jobSeekerSkills.seekerId, id));
+  // The Seeker's own free-typed skills (current). Older profiles created
+  // before this changed (e.g. via the Admin CSV importer, which still
+  // writes into the structured jobSeekerSkills table) fall back to a
+  // comma-joined list from there, so nothing already on file disappears.
+  let skillsDisplay = profile.skillsText;
+  if (!skillsDisplay) {
+    const skillRows = await db
+      .select({ label: skills.label })
+      .from(jobSeekerSkills)
+      .innerJoin(skills, eq(jobSeekerSkills.skillId, skills.id))
+      .where(eq(jobSeekerSkills.seekerId, id));
+    if (skillRows.length > 0) skillsDisplay = skillRows.map((s) => s.label).join(", ");
+  }
 
   const preferredRows = await db
     .select({ district: locations.district })
@@ -148,7 +158,8 @@ export async function getSeekerPublicProfile(id: number, isLoggedIn: boolean) {
     experience: profile.experience,
     jobType: profile.jobType,
     district: profile.district,
-    skills: skillRows.map((s) => s.label),
+    skills: skillsDisplay,
+    additionalNote: profile.additionalNote,
     preferredDistricts: preferredRows.map((p) => p.district),
     expectedSalary: isLoggedIn ? profile.expectedSalary : null,
     verificationPending: profile.verificationStatus === "not_yet_done",

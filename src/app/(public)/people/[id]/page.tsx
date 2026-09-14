@@ -51,20 +51,21 @@ export default async function SeekerProfilePage({ params }: { params: Promise<{ 
           </>
         )}
 
-        {profile.skills.length > 0 && (
+        {profile.skills && (
           <>
             <div className="text-sm font-semibold text-[var(--ink)] mt-4">Skills</div>
-            <div className="flex flex-wrap gap-1.5 mt-1.5">
-              {profile.skills.map((s) => (
-                <span key={s} className="text-xs bg-[var(--accent-soft)] text-[var(--accent-ink)] px-2 py-1 rounded-full">
-                  {s}
-                </span>
-              ))}
-            </div>
+            <p className="text-[var(--ink)] mt-1 whitespace-pre-line">{profile.skills}</p>
           </>
         )}
 
-        {current && current.user.id !== profile.userId && (
+        {profile.additionalNote && (
+          <>
+            <div className="text-sm font-semibold text-[var(--ink)] mt-4">Anything else</div>
+            <p className="text-[var(--ink)] mt-1 whitespace-pre-line">{profile.additionalNote}</p>
+          </>
+        )}
+
+        {current && current.user.id !== profile.userId && current.seekerProfile && (
           <div className="mt-4">
             <MessageButton otherUserId={profile.userId} />
           </div>

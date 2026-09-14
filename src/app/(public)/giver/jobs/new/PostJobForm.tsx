@@ -3,19 +3,16 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { postJobAction } from "@/app/actions/jobs";
-import { ensureSkillAction } from "@/app/actions/lookups";
 
 type Lookup = { id: number; label: string };
 
 export function PostJobForm({
   districts,
   qualifications,
-  initialSkills,
   defaultLocationId,
 }: {
   districts: { id: number; district: string; isRemote: boolean }[];
   qualifications: Lookup[];
-  initialSkills: Lookup[];
   defaultLocationId: number;
 }) {
   const router = useRouter();
@@ -23,9 +20,7 @@ export function PostJobForm({
   const [description, setDescription] = useState("");
   const [qualificationId, setQualificationId] = useState<number | "">("");
   const [qualificationOther, setQualificationOther] = useState("");
-  const [skillList, setSkillList] = useState(initialSkills);
-  const [selectedSkillIds, setSelectedSkillIds] = useState<number[]>([]);
-  const [customSkill, setCustomSkill] = useState("");
+  const [skillsNote, setSkillsNote] = useState("");
   const [jobType, setJobType] = useState<"full_time" | "part_time" | "wfh">("full_time");
   const [locationId, setLocationId] = useState<number>(defaultLocationId);
   const [salaryRange, setSalaryRange] = useState("");
@@ -33,21 +28,6 @@ export function PostJobForm({
   const [isPending, startTransition] = useTransition();
 
   const inputCls = "w-full border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-[var(--ink)]";
-
-  function toggleSkill(id: number) {
-    setSelectedSkillIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  }
-
-  async function addCustomSkill() {
-    const label = customSkill.trim();
-    if (!label) return;
-    const created = await ensureSkillAction(label);
-    if (created && !skillList.some((s) => s.id === created.id)) {
-      setSkillList((prev) => [...prev, created]);
-      setSelectedSkillIds((prev) => [...prev, created.id]);
-    }
-    setCustomSkill("");
-  }
 
   function submit() {
     setError(null);
@@ -60,7 +40,7 @@ export function PostJobForm({
         // positive id); qualificationOther carries the actual free-text value.
         qualificationId: qualificationId && qualificationId !== -1 ? Number(qualificationId) : undefined,
         qualificationOther: qualificationOther || undefined,
-        skillIds: selectedSkillIds,
+        skillsNote: skillsNote || undefined,
         jobType,
         locationId,
         salaryRange: salaryRange || undefined,
@@ -81,8 +61,20 @@ export function PostJobForm({
         <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputCls} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-[var(--ink)] mb-1">Description</label>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className={inputCls} />
+        <label className="block text-sm font-medium text-[var(--ink)] mb-1">
+          What does this job involve?
+        </label>
+        <p className="text-xs text-[var(--ink-faint)] mb-1">
+          Describe the day-to-day work clearly — what they'll actually do, timings/shift, and anything else a Job
+          Seeker should know before applying.
+        </p>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={4}
+          placeholder={"e.g. Help run the shop counter — billing, stock, and customer service.\nTimings: 10am–7pm, Monday to Saturday."}
+          className={inputCls}
+        />
       </div>
       <div>
         <label className="block text-sm font-medium text-[var(--ink)] mb-1">
@@ -105,29 +97,16 @@ export function PostJobForm({
         )}
       </div>
       <div>
-        <label className="block text-sm font-medium text-[var(--ink)] mb-1">Skills (optional)</label>
-        <div className="flex flex-wrap gap-2">
-          {skillList.map((s) => (
-            <button
-              type="button"
-              key={s.id}
-              onClick={() => toggleSkill(s.id)}
-              className={`text-sm px-3 py-1.5 rounded-full border ${
-                selectedSkillIds.includes(s.id)
-                  ? "bg-[var(--accent-soft)] border-[var(--accent)] text-[var(--accent-ink)]"
-                  : "border-[var(--border)] text-[var(--ink-muted)]"
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-2 mt-2">
-          <input placeholder="Add a skill" value={customSkill} onChange={(e) => setCustomSkill(e.target.value)} className={inputCls} />
-          <button type="button" onClick={addCustomSkill} className="px-3 py-2 border border-[var(--border)] rounded-md text-sm">
-            Add
-          </button>
-        </div>
+        <label className="block text-sm font-medium text-[var(--ink)] mb-1">
+          Skills / anything specific you're looking for (optional)
+        </label>
+        <textarea
+          value={skillsNote}
+          onChange={(e) => setSkillsNote(e.target.value)}
+          rows={2}
+          placeholder="e.g. Should know two-wheeler driving and basic Hindi/English."
+          className={inputCls}
+        />
       </div>
       <div>
         <label className="block text-sm font-medium text-[var(--ink)] mb-1">Job type</label>

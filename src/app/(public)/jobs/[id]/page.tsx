@@ -35,18 +35,13 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
         {job.qualification && (
           <p className="text-sm text-[var(--ink-muted)] mt-1">Minimum qualification: {job.qualification}</p>
         )}
-        <p className="mt-4 whitespace-pre-line text-[var(--ink)]">{job.description}</p>
+        <div className="text-sm font-semibold text-[var(--ink)] mt-4">What this job involves</div>
+        <p className="mt-1 whitespace-pre-line text-[var(--ink)]">{job.description}</p>
 
-        {job.skills.length > 0 && (
+        {job.skills && (
           <>
-            <div className="text-sm font-semibold text-[var(--ink)] mt-4">Skills required</div>
-            <div className="flex flex-wrap gap-1.5 mt-1.5">
-              {job.skills.map((s) => (
-                <span key={s} className="text-xs bg-[var(--accent-soft)] text-[var(--accent-ink)] px-2 py-1 rounded-full">
-                  {s}
-                </span>
-              ))}
-            </div>
+            <div className="text-sm font-semibold text-[var(--ink)] mt-4">Skills / requirements</div>
+            <p className="text-[var(--ink)] mt-1 whitespace-pre-line">{job.skills}</p>
           </>
         )}
 

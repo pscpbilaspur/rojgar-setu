@@ -28,9 +28,19 @@ export type GiverSubmitResult = { error: string } | { success: true };
 export async function createGiverProfileAction(
   input: GiverFormInput
 ): Promise<GiverSubmitResult> {
-  const { user, giverProfile } = await requireUser();
+  const { user, giverProfile, seekerProfile } = await requireUser();
   if (giverProfile) {
     return { error: "You already have a Job Giver profile." };
+  }
+  // One role per account — an account already registered as a Job Seeker
+  // can't also become a Job Giver. Never trust the client for this: the
+  // onboarding page already explains and blocks this before the form is
+  // even shown, but the check has to hold here too.
+  if (seekerProfile) {
+    return {
+      error:
+        "This account is already registered as a Job Seeker. An account can only be a Job Seeker or a Job Giver, not both.",
+    };
   }
 
   const parsed = giverSchema.safeParse(input);

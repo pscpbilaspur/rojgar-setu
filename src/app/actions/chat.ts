@@ -12,11 +12,25 @@ import { findExistingThread, getThreadForParticipant, getDisplayName } from "@/l
 /** Starts a message request to another user, or reuses an existing thread
  * between the two (Section 4.8: "First contact ... creates a message
  * request, not an open thread"). The first message is stored right away so
- * the recipient sees what the request is about when they open it. */
+ * the recipient sees what the request is about when they open it.
+ *
+ * Only a Job Seeker can start a new request — a Job Giver reaching out to
+ * seekers directly reads as cold, unsolicited contact, and Section 5's
+ * privacy rules already gate a seeker's contact details until they've
+ * applied. A Giver still replies freely once a thread exists (accepting a
+ * request, or once an applicant messages them) — this only blocks a Giver
+ * from being the one to open a brand-new thread. Never trust the client for
+ * this: the "Message" button is already hidden for Giver-only viewers, but
+ * the check has to hold here too. */
 export async function startChatAction(otherUserId: number, firstMessage: string) {
   const current = await requireUser();
   if (current.user.id === otherUserId) throw new Error("You cannot message yourself.");
   if (!firstMessage.trim()) throw new Error("Write a message first.");
+  if (!current.seekerProfile) {
+    throw new Error(
+      "Only Job Seekers can send a message request. As a Job Giver, you can reply once someone messages you or applies to your job."
+    );
+  }
 
   const otherUser = await db.query.users.findFirst({ where: eq(users.id, otherUserId) });
   if (!otherUser) throw new Error("User not found.");

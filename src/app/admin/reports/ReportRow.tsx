@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { setReportStatusAction } from "@/app/actions/admin";
+import { formatDateIST } from "@/lib/format";
 
 export function ReportRow({
   id,
@@ -38,7 +39,7 @@ export function ReportRow({
       </td>
       <td className="py-2 px-2 max-w-xs">{reason}</td>
       <td className="py-2 px-2">{reporterMobile}</td>
-      <td className="py-2 px-2 text-[var(--ink-faint)]">{new Date(createdAt).toLocaleDateString("en-IN")}</td>
+      <td className="py-2 px-2 text-[var(--ink-faint)]">{formatDateIST(createdAt)}</td>
       <td className="py-2 px-2">
         <span
           className={`text-xs px-2 py-0.5 rounded-full ${

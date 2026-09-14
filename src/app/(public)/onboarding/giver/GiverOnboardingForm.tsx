@@ -137,6 +137,11 @@ export function GiverOnboardingForm({
   return (
     <div className="space-y-3">
       <Field label="Select an Approver in your district" cls={inputCls}>
+        <p className="text-xs text-[var(--ink-muted)] mb-2">
+          An Approver personally vouches for real businesses, to keep fake profiles off the platform — so pick
+          someone here only if they'd actually recognize you or your business, like a known community member,
+          nearby shopkeeper, or someone from your panchayat.
+        </p>
         {approversLoading ? (
           <p className="text-sm text-[var(--ink-muted)]">Loading...</p>
         ) : approvers.length === 0 ? (
@@ -158,7 +163,7 @@ export function GiverOnboardingForm({
               ))}
             </select>
             <p className="text-xs text-[var(--ink-faint)] mt-1">
-              Pick someone who personally knows you or your business. Optional — you can also do this later.
+              Only pick someone who personally knows you or your business. Optional — you can also do this later.
             </p>
           </>
         )}

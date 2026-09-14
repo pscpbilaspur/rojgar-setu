@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/dal";
 import { db } from "@/db";
 import { suggestions, users } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { formatDateIST } from "@/lib/format";
 
 export default async function SuggestionsPage() {
   await requireAdmin();
@@ -32,7 +33,7 @@ export default async function SuggestionsPage() {
             >
               <p className="text-[var(--ink)] whitespace-pre-line">{s.body}</p>
               <p className="text-xs text-[var(--ink-faint)] mt-2">
-                {s.mobile ?? "Anonymous"} · {new Date(s.createdAt).toLocaleDateString("en-IN")}
+                {s.mobile ?? "Anonymous"} · {formatDateIST(s.createdAt)}
               </p>
             </div>
           ))}

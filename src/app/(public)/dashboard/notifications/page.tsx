@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/dal";
 import { getNotificationsForUser } from "@/lib/queries/notifications";
 import { markAllNotificationsReadAction } from "@/app/actions/notifications";
+import { formatDateTimeIST } from "@/lib/format";
 
 export default async function NotificationsPage() {
   const current = await requireUser();
@@ -33,7 +34,7 @@ export default async function NotificationsPage() {
             >
               <p className="text-[var(--ink)]">{n.body}</p>
               <p className="text-xs text-[var(--ink-faint)] mt-1">
-                {new Date(n.createdAt).toLocaleString("en-IN")}
+                {formatDateTimeIST(n.createdAt)}
               </p>
             </div>
           ))}

@@ -125,8 +125,12 @@ export async function verifyOtp(
     );
   }
 
-    // TEMPORARY dev/testing shortcut: fixed master OTP works until real SMS
-  // gateway is connected. Delete before real users start using OTP login.
+  // TEMPORARY dev/testing shortcut: while no real SMS gateway is configured
+  // (SMS_PROVIDER unset — see src/lib/sms.ts), a fixed master code also
+  // works, so testing doesn't require digging through Vercel logs for the
+  // real OTP every time. This is automatically inert once SMS_PROVIDER is
+  // set, but should still be deleted (this block + DEV_MASTER_OTP) before
+  // real users start relying on OTP login.
   const DEV_MASTER_OTP = "000000";
   const isDevBypass = !process.env.SMS_PROVIDER && code === DEV_MASTER_OTP;
 

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { jobs, jobSkills, applications, jobSeekerProfiles, jobGiverProfiles } from "@/db/schema";
+import { jobs, applications, jobSeekerProfiles, jobGiverProfiles } from "@/db/schema";
 import { requireUser } from "@/lib/dal";
 import { notify } from "@/lib/notify";
 
@@ -13,7 +13,7 @@ const postJobSchema = z.object({
   description: z.string().trim().min(10),
   qualificationId: z.coerce.number().int().positive().optional(),
   qualificationOther: z.string().trim().max(150).optional(),
-  skillIds: z.array(z.coerce.number().int().positive()).default([]),
+  skillsNote: z.string().trim().max(500).optional(),
   jobType: z.enum(["full_time", "part_time", "wfh"]),
   locationId: z.coerce.number().int().positive(),
   salaryRange: z.string().trim().max(100).optional(),
@@ -40,15 +40,12 @@ export async function postJobAction(input: PostJobInput): Promise<PostJobResult>
       description: data.description,
       qualificationId: data.qualificationId,
       qualificationOther: data.qualificationOther,
+      skillsNote: data.skillsNote,
       jobType: data.jobType,
       locationId: data.locationId,
       salaryRange: data.salaryRange,
     })
     .returning();
-
-  if (data.skillIds.length > 0) {
-    await db.insert(jobSkills).values(data.skillIds.map((skillId) => ({ jobId: job.id, skillId })));
-  }
 
   revalidatePath("/giver/jobs");
   return { success: true, jobId: job.id };

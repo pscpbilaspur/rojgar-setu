@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/dal";
 import { db } from "@/db";
 import { auditLogs } from "@/db/schema";
 import { desc } from "drizzle-orm";
+import { formatDateTimeIST } from "@/lib/format";
 
 export default async function AuditLogPage() {
   await requireAdmin();
@@ -32,7 +33,7 @@ export default async function AuditLogPage() {
               {logs.map((l) => (
                 <tr key={l.id} className="border-b border-[var(--border)] align-top">
                   <td className="py-2 px-2 text-[var(--ink-faint)] whitespace-nowrap">
-                    {new Date(l.createdAt).toLocaleString("en-IN")}
+                    {formatDateTimeIST(l.createdAt)}
                   </td>
                   <td className="py-2 px-2">
                     {l.actorType} #{l.actorId}

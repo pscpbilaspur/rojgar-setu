@@ -3,7 +3,6 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateSeekerProfileAction } from "@/app/actions/seeker";
-import { ensureSkillAction } from "@/app/actions/lookups";
 
 type Lookup = { id: number; label: string };
 type District = { id: number; district: string; isRemote: boolean };
@@ -11,12 +10,10 @@ type District = { id: number; district: string; isRemote: boolean };
 export function EditSeekerForm({
   districts,
   qualifications,
-  initialSkills,
   profile,
 }: {
   districts: District[];
   qualifications: Lookup[];
-  initialSkills: Lookup[];
   profile: {
     name: string;
     fatherName: string;
@@ -26,7 +23,8 @@ export function EditSeekerForm({
     experience: string | null;
     expectedSalary: string | null;
     jobType: "full_time" | "part_time" | "wfh";
-    skillIds: number[];
+    skillsText: string | null;
+    additionalNote: string | null;
     preferredLocationIds: number[];
   };
 }) {
@@ -40,9 +38,8 @@ export function EditSeekerForm({
   const [hometownDistrictId, setHometownDistrictId] = useState(profile.hometownDistrictId);
   const [qualificationId, setQualificationId] = useState<number | "">(profile.qualificationId ?? "");
   const [qualificationOther, setQualificationOther] = useState(profile.qualificationOther ?? "");
-  const [skillList, setSkillList] = useState(initialSkills);
-  const [selectedSkillIds, setSelectedSkillIds] = useState<number[]>(profile.skillIds);
-  const [customSkill, setCustomSkill] = useState("");
+  const [skillsText, setSkillsText] = useState(profile.skillsText ?? "");
+  const [additionalNote, setAdditionalNote] = useState(profile.additionalNote ?? "");
   const [experience, setExperience] = useState(profile.experience ?? "");
   const [expectedSalary, setExpectedSalary] = useState(profile.expectedSalary ?? "");
   const [jobType, setJobType] = useState(profile.jobType);
@@ -50,21 +47,8 @@ export function EditSeekerForm({
 
   const realDistricts = useMemo(() => districts.filter((d) => !d.isRemote), [districts]);
 
-  function toggleSkill(id: number) {
-    setSelectedSkillIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  }
   function toggleLocation(id: number) {
     setPreferredLocationIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  }
-  async function addCustomSkill() {
-    const label = customSkill.trim();
-    if (!label) return;
-    const created = await ensureSkillAction(label);
-    if (created && !skillList.some((s) => s.id === created.id)) {
-      setSkillList((prev) => [...prev, created]);
-      setSelectedSkillIds((prev) => [...prev, created.id]);
-    }
-    setCustomSkill("");
   }
 
   function submit() {
@@ -80,7 +64,8 @@ export function EditSeekerForm({
         // positive id); qualificationOther carries the actual free-text value.
         qualificationId: qualificationId && qualificationId !== -1 ? Number(qualificationId) : undefined,
         qualificationOther: qualificationOther || undefined,
-        skillIds: selectedSkillIds,
+        skillsText: skillsText || undefined,
+        additionalNote: additionalNote || undefined,
         experience: experience || undefined,
         expectedSalary: expectedSalary || undefined,
         jobType,
@@ -135,37 +120,26 @@ export function EditSeekerForm({
           className={inputCls}
         />
       )}
-      <Field label="Skills">
-        <div className="flex flex-wrap gap-2">
-          {skillList.map((s) => (
-            <button
-              type="button"
-              key={s.id}
-              onClick={() => toggleSkill(s.id)}
-              className={`text-sm px-3 py-1.5 rounded-full border ${
-                selectedSkillIds.includes(s.id)
-                  ? "bg-[var(--accent-soft)] border-[var(--accent)] text-[var(--accent-ink)]"
-                  : "border-[var(--border)] text-[var(--ink-muted)]"
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-2 mt-2">
-          <input
-            placeholder="Add your own skill"
-            value={customSkill}
-            onChange={(e) => setCustomSkill(e.target.value)}
-            className={inputCls}
-          />
-          <button type="button" onClick={addCustomSkill} className="px-3 py-2 border border-[var(--border)] rounded-md text-sm">
-            Add
-          </button>
-        </div>
+      <Field label="Your skills (optional)">
+        <textarea
+          value={skillsText}
+          onChange={(e) => setSkillsText(e.target.value)}
+          rows={2}
+          placeholder="e.g. Driving, tailoring, computer basics, cooking..."
+          className={inputCls}
+        />
       </Field>
       <Field label="Experience">
         <textarea value={experience} onChange={(e) => setExperience(e.target.value)} className={inputCls} rows={3} />
+      </Field>
+      <Field label="Anything else you'd like employers to know? (optional)">
+        <textarea
+          value={additionalNote}
+          onChange={(e) => setAdditionalNote(e.target.value)}
+          rows={2}
+          placeholder="Anything not covered above..."
+          className={inputCls}
+        />
       </Field>
       <Field label="Expected salary">
         <input value={expectedSalary} onChange={(e) => setExpectedSalary(e.target.value)} className={inputCls} />

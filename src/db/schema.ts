@@ -131,6 +131,14 @@ export const jobSeekerProfiles = pgTable("job_seeker_profiles", {
   ),
   qualificationOther: varchar("qualification_other", { length: 150 }),
   experience: text("experience"),
+  // Free-text skills, typed by the Seeker themselves — replaces the old
+  // pick-from-a-list-of-tags UI (Section 6's shared skills catalog is still
+  // used by the Admin CSV importer and kept as a fallback for older
+  // profiles imported that way; see getSeekerPublicProfile).
+  skillsText: text("skills_text"),
+  // A free-text "anything else" note, separate from skills — e.g. availability
+  // quirks, a certificate, anything that doesn't fit the structured fields.
+  additionalNote: text("additional_note"),
   expectedSalary: varchar("expected_salary", { length: 60 }),
   jobType: varchar("job_type", { length: 20 }).notNull().default("full_time"), // full_time | part_time | wfh
   // District-only location (Section 4.6) — never a full postal address.
@@ -217,6 +225,11 @@ export const jobs = pgTable("jobs", {
     () => qualifications.id
   ), // optional — Section 4.5: never force this field
   qualificationOther: varchar("qualification_other", { length: 150 }),
+  // Free-text skills/requirements, typed by the Job Giver themselves —
+  // replaces the old pick-from-a-list-of-tags UI (see jobSeekerProfiles.skillsText
+  // for the same change on the Seeker side; the shared skills catalog is
+  // kept only as a fallback for older jobs, see getJobDetail).
+  skillsNote: text("skills_note"),
   jobType: varchar("job_type", { length: 20 }).notNull().default("full_time"), // full_time | part_time | wfh
   locationId: integer("location_id")
     .notNull()

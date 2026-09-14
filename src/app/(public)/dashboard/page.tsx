@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { eq, and, sql } from "drizzle-orm";
 import { requireUser } from "@/lib/dal";
@@ -98,17 +97,6 @@ export default async function DashboardPage() {
             <NavCard href="/dashboard/business-profile" label="Edit Business Profile" icon="✏️" />
           </div>
         </section>
-      )}
-
-      {!giverProfile && (
-        <p className="text-sm text-[var(--ink-muted)]">
-          Also want to post jobs? <Link href="/onboarding/giver" className="underline">Create a Job Giver profile</Link>
-        </p>
-      )}
-      {!seekerProfile && (
-        <p className="text-sm text-[var(--ink-muted)]">
-          Also looking for work? <Link href="/onboarding/seeker" className="underline">Create a Job Seeker profile</Link>
-        </p>
       )}
     </div>
   );
