@@ -23,13 +23,13 @@
   --seeker-accent: var(--accent);
   --seeker-accent-soft: var(--accent-soft);
   --seeker-accent-ink: var(--accent-ink);
-  --giver-accent: #3B6EA5;
-  --giver-accent-soft: #DDE6F0;
-  --giver-accent-ink: #1F3F5C;
+  --giver-accent: #5B5FC7;
+  --giver-accent-soft: #E8E8FA;
+  --giver-accent-ink: #37368F;
 }
 
-/* A Job Giver's whole logged-in experience uses the blue theme above
-   instead of the site's default teal — set once, on a wrapping element in
+/* A Job Giver's whole logged-in experience uses the indigo/violet theme
+   above instead of the site's default teal — set once, on a wrapping element in
    (public)/layout.tsx, based on the logged-in account's role. Every
    component already reads var(--accent)/--accent-soft/--accent-ink rather
    than a hardcoded color, so this alone re-themes buttons, links, chips

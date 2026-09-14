@@ -4,6 +4,7 @@ import { BrandHeroLockup } from "@/components/Brand";
 import { FeatureCard, StepCard, CollapsibleSection } from "@/components/ui";
 import { getRecentOpenJobs } from "@/lib/queries/jobs";
 import { countPlatformStats } from "@/lib/queries/people";
+import { getCurrentUser } from "@/lib/dal";
 
 const JOB_TYPE_LABEL: Record<string, { hi: string; en: string }> = {
   full_time: { hi: "पूर्णकालिक", en: "Full-time" },
@@ -13,14 +14,41 @@ const JOB_TYPE_LABEL: Record<string, { hi: string; en: string }> = {
 
 export default async function HomePage() {
   const { lang, t } = await getTranslations();
-  const [recentJobs, stats] = await Promise.all([getRecentOpenJobs(3), countPlatformStats()]);
+  const [recentJobs, stats, current] = await Promise.all([
+    getRecentOpenJobs(3),
+    countPlatformStats(),
+    getCurrentUser(),
+  ]);
+  // Once someone is logged in as a Seeker or a Giver, one account = one role
+  // (see (public)/onboarding — the other role is blocked outright), so the
+  // "I'm looking for work" / "I want to hire" tile for the role they're NOT
+  // is just a dead end for them now — hidden rather than shown-but-blocked.
+  // Their own tile instead goes straight to their dashboard (they already
+  // have a profile, no need to log in again). Anonymous visitors, and
+  // accounts with no profile yet, still see both, unchanged. Each keeps its
+  // own fixed brand color (--seeker-accent-soft / --giver-accent-soft, see
+  // globals.css) regardless of which theme is currently active on the page,
+  // so the tile someone picks always looks like the account it leads to.
+  const role = current?.seekerProfile ? "seeker" : current?.giverProfile ? "giver" : undefined;
 
   const actionTiles = [
-    { href: "/login?role=seeker", icon: "📝", title: t("home_needJobTitle"), sub: t("home_needJobSub"), v: "a" },
-    { href: "/login?role=giver", icon: "🏢", title: t("home_haveJobTitle"), sub: t("home_haveJobSub"), v: "b" },
-    { href: "/jobs", icon: "🔎", title: t("nav_findJobs"), sub: t("home_findJobsSub"), v: "a" },
-    { href: "/people", icon: "👤", title: t("nav_findPeople"), sub: t("home_findPeopleSub"), v: "b" },
-  ] as const;
+    role !== "giver" && {
+      href: role === "seeker" ? "/dashboard" : "/login?role=seeker",
+      icon: "📝",
+      title: t("home_needJobTitle"),
+      sub: t("home_needJobSub"),
+      accentSoft: "var(--seeker-accent-soft)",
+    },
+    role !== "seeker" && {
+      href: role === "giver" ? "/dashboard" : "/login?role=giver",
+      icon: "🏢",
+      title: t("home_haveJobTitle"),
+      sub: t("home_haveJobSub"),
+      accentSoft: "var(--giver-accent-soft)",
+    },
+    { href: "/jobs", icon: "🔎", title: t("nav_findJobs"), sub: t("home_findJobsSub"), accentSoft: "var(--accent-soft)" },
+    { href: "/people", icon: "👤", title: t("nav_findPeople"), sub: t("home_findPeopleSub"), accentSoft: "var(--accent2-soft)" },
+  ].filter((tile): tile is { href: string; icon: string; title: string; sub: string; accentSoft: string } => Boolean(tile));
 
   const features = [
     { icon: "🤝", title: t("home_feature1Title"), sub: t("home_feature1Sub"), v: "a" },
@@ -53,7 +81,7 @@ export default async function HomePage() {
             >
               <div
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-base sm:text-lg mb-2"
-                style={{ background: tile.v === "a" ? "var(--accent-soft)" : "var(--accent2-soft)" }}
+                style={{ background: tile.accentSoft }}
               >
                 {tile.icon}
               </div>
