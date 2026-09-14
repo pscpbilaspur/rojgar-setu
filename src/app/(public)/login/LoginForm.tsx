@@ -13,7 +13,13 @@ type Strings = {
   changeNumber: string;
 };
 
-export function LoginForm({ strings }: { strings: Strings }) {
+export function LoginForm({
+  strings,
+  intendedRole,
+}: {
+  strings: Strings;
+  intendedRole?: "seeker" | "giver";
+}) {
   const router = useRouter();
   const [stage, setStage] = useState<"mobile" | "otp">("mobile");
   const [mobile, setMobile] = useState("");
@@ -41,7 +47,7 @@ export function LoginForm({ strings }: { strings: Strings }) {
         return;
       }
       if (result.needsOnboarding) {
-        router.push("/onboarding");
+        router.push(intendedRole ? `/onboarding?role=${intendedRole}` : "/onboarding");
       } else if (result.hasSeeker) {
         router.push("/dashboard");
       } else {

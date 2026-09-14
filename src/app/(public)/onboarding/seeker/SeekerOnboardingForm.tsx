@@ -12,7 +12,7 @@ export function SeekerOnboardingForm({
   qualifications,
   initialSkills,
 }: {
-  districts: { id: number; district: string; isRemote: boolean }[];
+  districts: { id: number; district: string; state: string; isRemote: boolean }[];
   qualifications: Lookup[];
   initialSkills: Lookup[];
 }) {
@@ -47,6 +47,16 @@ export function SeekerOnboardingForm({
   );
 
   const realDistricts = useMemo(() => districts.filter((d) => !d.isRemote), [districts]);
+  // State step (only Chhattisgarh exists today — see ACTIVE_DISTRICTS in
+  // src/db/seed-data/districts.ts). Kept as a real, separate selection (not
+  // folded into the district list) so adding a second state later is just
+  // seed data, not a form rewrite.
+  const states = useMemo(() => Array.from(new Set(realDistricts.map((d) => d.state))), [realDistricts]);
+  const [hometownState, setHometownState] = useState(states[0] ?? "");
+  const hometownDistrictOptions = useMemo(
+    () => realDistricts.filter((d) => d.state === hometownState),
+    [realDistricts, hometownState]
+  );
 
   function toggleSkill(id: number) {
     setSelectedSkillIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -117,6 +127,22 @@ export function SeekerOnboardingForm({
           <Field label="Father's name">
             <input value={fatherName} onChange={(e) => setFatherName(e.target.value)} className={inputCls} />
           </Field>
+          <Field label="State">
+            <select
+              value={hometownState}
+              onChange={(e) => {
+                setHometownState(e.target.value);
+                setHometownDistrictId("");
+              }}
+              className={inputCls}
+            >
+              {states.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </Field>
           <Field label="Hometown district">
             <select
               value={hometownDistrictId}
@@ -124,7 +150,7 @@ export function SeekerOnboardingForm({
               className={inputCls}
             >
               <option value="">Select district</option>
-              {realDistricts.map((d) => (
+              {hometownDistrictOptions.map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.district}
                 </option>

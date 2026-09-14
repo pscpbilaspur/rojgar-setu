@@ -1,3 +1,33 @@
+/**
+ * A native, no-JS collapsible section (the browser's own <details>/<summary>
+ * disclosure widget) — used for secondary homepage content (Our Purpose, How
+ * it Works, Recent Jobs) so the page is short by default on mobile and each
+ * section expands on tap. This is the standard, currently-common pattern for
+ * this (an accordion/disclosure), and it's fully accessible and keyboardable
+ * for free since it's a real browser element, not a custom-built toggle.
+ */
+export function CollapsibleSection({
+  title,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  return (
+    <details className="group" open={defaultOpen}>
+      <summary className="flex items-center justify-center gap-2 cursor-pointer list-none py-1 select-none">
+        <h2 className="text-[19px] sm:text-[23px] font-bold text-[var(--ink)]">{title}</h2>
+        <span className="text-[var(--ink-muted)] transition-transform group-open:rotate-180 text-[13px] mt-0.5">
+          ▾
+        </span>
+      </summary>
+      <div className="pt-3">{children}</div>
+    </details>
+  );
+}
+
 export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div

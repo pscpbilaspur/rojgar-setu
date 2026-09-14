@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "@/lib/i18n";
 import { BrandHeroLockup } from "@/components/Brand";
-import { FeatureCard, StepCard } from "@/components/ui";
+import { FeatureCard, StepCard, CollapsibleSection } from "@/components/ui";
 import { getRecentOpenJobs } from "@/lib/queries/jobs";
 
 const JOB_TYPE_LABEL: Record<string, { hi: string; en: string }> = {
@@ -15,8 +15,8 @@ export default async function HomePage() {
   const recentJobs = await getRecentOpenJobs(3);
 
   const actionTiles = [
-    { href: "/register?role=seeker", icon: "📝", title: t("home_needJobTitle"), sub: t("home_needJobSub"), v: "a" },
-    { href: "/register?role=giver", icon: "🏢", title: t("home_haveJobTitle"), sub: t("home_haveJobSub"), v: "b" },
+    { href: "/login?role=seeker", icon: "📝", title: t("home_needJobTitle"), sub: t("home_needJobSub"), v: "a" },
+    { href: "/login?role=giver", icon: "🏢", title: t("home_haveJobTitle"), sub: t("home_haveJobSub"), v: "b" },
     { href: "/jobs", icon: "🔎", title: t("nav_findJobs"), sub: t("home_findJobsSub"), v: "a" },
     { href: "/people", icon: "👤", title: t("nav_findPeople"), sub: t("home_findPeopleSub"), v: "b" },
   ] as const;
@@ -65,64 +65,63 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Purpose */}
-      <section className="py-5 sm:py-6">
-        <h2 className="text-center text-[19px] sm:text-[23px] font-bold text-[var(--ink)]">
-          {t("home_purposeTitle")}
-        </h2>
-        <p className="max-w-[70ch] mx-auto mt-2.5 sm:mt-3 text-center text-[14px] sm:text-base text-[var(--ink-muted)] leading-relaxed">
-          {t("home_purposeLead")}
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-5 sm:mt-6">
-          {features.map((f) => (
-            <FeatureCard key={f.title} icon={f.icon} title={f.title} sub={f.sub} variant={f.v} />
-          ))}
-        </div>
+      {/* Purpose — collapsed by default, tap to expand (keeps the mobile page short) */}
+      <section className="py-3 sm:py-4 border-t border-[var(--border)]">
+        <CollapsibleSection title={t("home_purposeTitle")}>
+          <p className="max-w-[70ch] mx-auto text-center text-[14px] sm:text-base text-[var(--ink-muted)] leading-relaxed">
+            {t("home_purposeLead")}
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-5">
+            {features.map((f) => (
+              <FeatureCard key={f.title} icon={f.icon} title={f.title} sub={f.sub} variant={f.v} />
+            ))}
+          </div>
+        </CollapsibleSection>
       </section>
 
       {/* How it works */}
-      <section className="py-6 sm:py-8 -mx-4 px-4 bg-[var(--surface-2)] rounded-[var(--radius)]">
-        <h2 className="text-center text-[19px] sm:text-[23px] font-bold text-[var(--ink)]">
-          {t("home_howItWorks")}
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 mt-5 sm:mt-6 max-w-4xl mx-auto">
-          {steps.map((s) => (
-            <StepCard key={s.num} num={s.num} title={s.title} sub={s.sub} />
-          ))}
-        </div>
-      </section>
-
-      {/* Recent jobs */}
-      <section className="py-6 sm:py-8">
-        <h2 className="text-[18px] sm:text-[20px] font-bold text-[var(--ink)]">{t("home_recentJobs")}</h2>
-        {recentJobs.length === 0 ? (
-          <div className="mt-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-[var(--radius)] p-5 text-center">
-            <p className="text-[14px] sm:text-base text-[var(--ink-muted)]">{t("home_noJobsYet")}</p>
-            <Link
-              href="/register?role=giver"
-              className="inline-block mt-3 text-[14px] font-semibold text-[var(--accent-ink)] underline underline-offset-2"
-            >
-              {t("home_postFirstJobCta")}
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-            {recentJobs.map((job) => (
-              <Link
-                key={job.id}
-                href={`/jobs/${job.id}`}
-                className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4"
-                style={{ boxShadow: "var(--shadow)" }}
-              >
-                <h4 className="font-semibold text-[var(--ink)]">{job.title}</h4>
-                <p className="text-[13px] text-[var(--ink-muted)] mt-1">{job.businessName}</p>
-                <p className="text-[12px] text-[var(--ink-faint)] mt-2">
-                  {job.district} · {JOB_TYPE_LABEL[job.jobType]?.[lang] ?? job.jobType}
-                </p>
-              </Link>
+      <section className="py-3 sm:py-4 -mx-4 px-4 bg-[var(--surface-2)] rounded-[var(--radius)]">
+        <CollapsibleSection title={t("home_howItWorks")}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 max-w-4xl mx-auto">
+            {steps.map((s) => (
+              <StepCard key={s.num} num={s.num} title={s.title} sub={s.sub} />
             ))}
           </div>
-        )}
+        </CollapsibleSection>
+      </section>
+
+      {/* Recent jobs — kept open by default (real, actionable content, not filler) */}
+      <section className="py-3 sm:py-4 border-t border-[var(--border)]">
+        <CollapsibleSection title={t("home_recentJobs")} defaultOpen>
+          {recentJobs.length === 0 ? (
+            <div className="bg-[var(--surface-2)] border border-[var(--border)] rounded-[var(--radius)] p-5 text-center">
+              <p className="text-[14px] sm:text-base text-[var(--ink-muted)]">{t("home_noJobsYet")}</p>
+              <Link
+                href="/login?role=giver"
+                className="inline-block mt-3 text-[14px] font-semibold text-[var(--accent-ink)] underline underline-offset-2"
+              >
+                {t("home_postFirstJobCta")}
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {recentJobs.map((job) => (
+                <Link
+                  key={job.id}
+                  href={`/jobs/${job.id}`}
+                  className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4"
+                  style={{ boxShadow: "var(--shadow)" }}
+                >
+                  <h4 className="font-semibold text-[var(--ink)]">{job.title}</h4>
+                  <p className="text-[13px] text-[var(--ink-muted)] mt-1">{job.businessName}</p>
+                  <p className="text-[12px] text-[var(--ink-faint)] mt-2">
+                    {job.district} · {JOB_TYPE_LABEL[job.jobType]?.[lang] ?? job.jobType}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          )}
+        </CollapsibleSection>
       </section>
     </div>
   );

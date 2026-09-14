@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { createGiverProfileAction } from "@/app/actions/giver";
 import { getApproversForDistrictAction } from "@/app/actions/lookups";
 import { JOB_CATEGORIES } from "@/db/seed-data/districts";
@@ -10,7 +10,7 @@ type Approver = { id: number; name: string };
 export function GiverOnboardingForm({
   districts,
 }: {
-  districts: { id: number; district: string; isRemote: boolean }[];
+  districts: { id: number; district: string; state: string; isRemote: boolean }[];
 }) {
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +29,12 @@ export function GiverOnboardingForm({
   const [approversLoading, setApproversLoading] = useState(false);
 
   const realDistricts = districts.filter((d) => !d.isRemote);
+  const states = useMemo(() => Array.from(new Set(realDistricts.map((d) => d.state))), [realDistricts]);
+  const [locationState, setLocationState] = useState(states[0] ?? "");
+  const locationDistrictOptions = useMemo(
+    () => realDistricts.filter((d) => d.state === locationState),
+    [realDistricts, locationState]
+  );
 
   async function goToStep2() {
     setError(null);
@@ -89,10 +95,24 @@ export function GiverOnboardingForm({
             className={inputCls}
           />
         )}
+        <Field label="State" cls={inputCls}>
+          <select
+            value={locationState}
+            onChange={(e) => {
+              setLocationState(e.target.value);
+              setLocationId("");
+            }}
+            className={inputCls}
+          >
+            {states.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </Field>
         <Field label="District" cls={inputCls}>
           <select value={locationId} onChange={(e) => setLocationId(e.target.value ? Number(e.target.value) : "")} className={inputCls}>
             <option value="">Select district</option>
-            {realDistricts.map((d) => (
+            {locationDistrictOptions.map((d) => (
               <option key={d.id} value={d.id}>{d.district}</option>
             ))}
           </select>

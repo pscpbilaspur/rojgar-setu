@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/dal";
 import { getTranslations } from "@/lib/i18n";
 
@@ -6,9 +7,20 @@ import { getTranslations } from "@/lib/i18n";
 // actual multi-step forms (basic info -> education & work -> preferences ->
 // select approver, per Section 3's panel outlines) are the next slice of
 // work — this page exists so the OTP login flow has somewhere real to land.
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ role?: string }>;
+}) {
   const { user } = await requireUser();
   const { t } = await getTranslations();
+  const { role } = await searchParams;
+
+  // Came here from the homepage's "I'm looking for work" / "I want to hire"
+  // tile (via /login?role=...) — skip the choice screen and go straight to
+  // the right form instead of asking again.
+  if (role === "seeker") redirect("/onboarding/seeker");
+  if (role === "giver") redirect("/onboarding/giver");
 
   return (
     <div className="max-w-md mx-auto px-4 py-14 text-center">
