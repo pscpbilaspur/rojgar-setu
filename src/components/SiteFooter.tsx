@@ -37,6 +37,10 @@ export async function SiteFooter() {
           <Link href="/suggest" className="underline">
             {t("footer_suggest")}
           </Link>
+          <span>·</span>
+          <Link href="/approver/login" className="underline">
+            {t("footer_approverLogin")}
+          </Link>
         </div>
       </div>
       <div className="text-center pb-2.5 pt-1 sm:pb-5 px-4 bg-[var(--bg)]">
