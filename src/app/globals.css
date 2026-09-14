@@ -14,19 +14,12 @@
   --radius: 12px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #111613; --surface: #181F1B; --surface-2: #1F2823; --border: #2B362F;
-    --ink: #E7ECE9; --ink-muted: #A6B3AC; --ink-faint: #71807A;
-    --accent: #5FA89F; --accent-soft: #1C3532; --accent-ink: #8FC7BF;
-    --accent2: #C7A468; --accent2-soft: #332A17;
-    --ok: #4FAE78; --ok-soft: #173226;
-    --warn: #D7B24E; --warn-soft: #332B12;
-    --danger: #E2685A; --danger-soft: #3B211D;
-    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 6px 22px rgba(0,0,0,.35);
-  }
-}
-
+/* The site always uses the light palette from :root above, regardless of
+   the visitor's phone/browser dark-mode setting — there's no in-app
+   light/dark toggle, so silently following the OS setting meant some
+   visitors saw an unrequested dark theme with no way to change it. The
+   dark palette itself is kept below, unused unless something sets
+   data-theme="dark" (e.g. a future manual toggle). */
 :root[data-theme="dark"] {
   --bg: #111613; --surface: #181F1B; --surface-2: #1F2823; --border: #2B362F;
   --ink: #E7ECE9; --ink-muted: #A6B3AC; --ink-faint: #71807A;

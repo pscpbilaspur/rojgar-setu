@@ -74,6 +74,8 @@ export default async function AdminDashboardPage() {
         <AdminNavCard href="/admin/reports" label="Reports" />
         <AdminNavCard href="/admin/suggestions" label="Suggestions" />
         <AdminNavCard href="/admin/audit-log" label="Audit Log" />
+        <AdminNavCard href="/admin/import" label="Import Seekers (CSV)" />
+        <AdminNavCard href="/admin/import-givers" label="Import Givers (CSV)" />
       </nav>
     </div>
   );
