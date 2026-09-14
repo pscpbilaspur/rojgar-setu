@@ -89,10 +89,9 @@ export function SeekerOnboardingForm({
 
   function submit() {
     setError(null);
-    if (!approverId) {
-      setError("Please select an Approver.");
-      return;
-    }
+    // Approver selection is always optional and skippable (Section 4.2) —
+    // never a condition for creating the account. Skipped, or no Approver
+    // exists in this district yet -> status just stays "not yet done".
     startTransition(async () => {
       const result = await createSeekerProfileAction({
         name,
@@ -108,7 +107,7 @@ export function SeekerOnboardingForm({
         expectedSalary: expectedSalary || undefined,
         jobType,
         preferredLocationIds,
-        approverId: Number(approverId),
+        approverId: approverId ? Number(approverId) : undefined,
         contactSharePolicy,
       });
       if (result && "error" in result) {
@@ -285,25 +284,27 @@ export function SeekerOnboardingForm({
               <p className="text-sm text-[var(--ink-muted)]">Loading...</p>
             ) : approvers.length === 0 ? (
               <p className="text-sm text-[var(--warn)]">
-                No Approver is assigned to your district yet. Please check back later or contact support.
+                No Approver is assigned to your district yet. You can continue without one — your Basic Verification will simply stay &quot;not yet done&quot; until an Approver is available.
               </p>
             ) : (
-              <select
-                value={approverId}
-                onChange={(e) => setApproverId(e.target.value ? Number(e.target.value) : "")}
-                className={inputCls}
-              >
-                <option value="">Select an Approver</option>
-                {approvers.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
-                ))}
-              </select>
+              <>
+                <select
+                  value={approverId}
+                  onChange={(e) => setApproverId(e.target.value ? Number(e.target.value) : "")}
+                  className={inputCls}
+                >
+                  <option value="">Skip for now</option>
+                  {approvers.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-[var(--ink-faint)] mt-1">
+                  Pick someone who personally knows you or your work. Optional — you can also do this later.
+                </p>
+              </>
             )}
-            <p className="text-xs text-[var(--ink-faint)] mt-1">
-              Pick someone who personally knows you or your work.
-            </p>
           </Field>
           <Field label="Who can see your mobile number?">
             <select
@@ -323,7 +324,7 @@ export function SeekerOnboardingForm({
             <button
               type="button"
               onClick={submit}
-              disabled={isPending || !approverId}
+              disabled={isPending}
               className="flex-1 bg-[var(--accent)] text-white rounded-md py-2 font-medium disabled:opacity-60"
             >
               Submit

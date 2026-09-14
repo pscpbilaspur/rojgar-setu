@@ -1,10 +1,10 @@
 "use server";
 
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { approvers, reports, jobs, auditLogs, users } from "@/db/schema";
+import { approvers, reports, jobs, auditLogs, users, jobSeekerProfiles, jobGiverProfiles, verificationRequests } from "@/db/schema";
 import { requireAdmin } from "@/lib/dal";
 
 const approverSchema = z.object({
@@ -99,6 +99,56 @@ export async function setJobModerationAction(jobId: number, state: "approved" | 
   });
 
   revalidatePath("/admin/moderation");
+}
+
+/** Central Admin can directly set a profile's Basic Verification status —
+ * a manual override alongside the normal Approver flow. This matters most
+ * right now while many districts have no Approver assigned yet (Section
+ * 4.2: "not yet done" is the correct resting state, but Admin still needs a
+ * way to manually confirm someone when there's no one else to do it). Never
+ * exposed as a public "Verified" badge (Section 5) — this only changes the
+ * same internal status an Approver's decision would have set. */
+export async function setProfileVerificationAction(
+  profileType: "seeker" | "giver",
+  profileId: number,
+  status: "confirmed" | "unable_to_confirm" | "not_yet_done"
+) {
+  const admin = await requireAdmin();
+  const table = profileType === "seeker" ? jobSeekerProfiles : jobGiverProfiles;
+
+  const profile =
+    profileType === "seeker"
+      ? await db.query.jobSeekerProfiles.findFirst({ where: eq(jobSeekerProfiles.id, profileId) })
+      : await db.query.jobGiverProfiles.findFirst({ where: eq(jobGiverProfiles.id, profileId) });
+  if (!profile) throw new Error("Profile not found.");
+
+  await db.update(table).set({ verificationStatus: status, updatedAt: new Date() }).where(eq(table.id, profileId));
+
+  // Close out any still-pending Approver request for this profile so it
+  // doesn't sit stale in an Approver's queue after Admin has already
+  // decided (same "one decision is enough" rule as Section 4.2).
+  await db
+    .update(verificationRequests)
+    .set({ status: status === "confirmed" ? "confirmed" : status === "unable_to_confirm" ? "unable_to_confirm" : "pending" })
+    .where(
+      and(
+        eq(verificationRequests.profileType, profileType),
+        eq(verificationRequests.profileId, profileId),
+        eq(verificationRequests.status, "pending")
+      )
+    );
+
+  await db.insert(auditLogs).values({
+    actorType: "admin",
+    actorId: admin.adminId,
+    action: "profile_verification_changed",
+    targetType: profileType === "seeker" ? "job_seeker_profile" : "job_giver_profile",
+    targetId: profileId,
+    before: { verificationStatus: profile.verificationStatus },
+    after: { verificationStatus: status },
+  });
+
+  revalidatePath("/admin/users");
 }
 
 export async function setReportStatusAction(reportId: number, status: "reviewed" | "dismissed") {

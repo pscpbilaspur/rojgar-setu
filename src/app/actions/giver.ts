@@ -16,7 +16,10 @@ const giverSchema = z.object({
   locationId: z.coerce.number().int().positive(),
   about: z.string().trim().max(2000).optional(),
   website: z.string().trim().max(300).optional(),
-  approverId: z.coerce.number().int().positive(),
+  // Optional — Section 4.2: Approver selection is always optional and
+  // skippable, and must never block account creation, including when a
+  // district has no Approver assigned yet at all.
+  approverId: z.coerce.number().int().positive().optional(),
 });
 
 export type GiverFormInput = z.infer<typeof giverSchema>;
@@ -49,15 +52,21 @@ export async function createGiverProfileAction(
         about: data.about,
         website: data.website,
         approverId: data.approverId,
+        // No Approver picked (skipped, or none exists in this district yet)
+        // -> stays "not_yet_done", never left on the default "pending" which
+        // would misleadingly imply someone is actually working on it.
+        verificationStatus: data.approverId ? "pending" : "not_yet_done",
       })
       .returning();
 
-    await tx.insert(verificationRequests).values({
-      profileType: "giver",
-      profileId: profile.id,
-      approverId: data.approverId,
-      status: "pending",
-    });
+    if (data.approverId) {
+      await tx.insert(verificationRequests).values({
+        profileType: "giver",
+        profileId: profile.id,
+        approverId: data.approverId,
+        status: "pending",
+      });
+    }
   });
 
   redirect("/dashboard");

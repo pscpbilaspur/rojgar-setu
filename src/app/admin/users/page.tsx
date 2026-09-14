@@ -12,8 +12,12 @@ export default async function UsersPage() {
       id: users.id,
       mobile: users.mobile,
       status: users.status,
+      seekerId: jobSeekerProfiles.id,
       seekerName: jobSeekerProfiles.name,
+      seekerVerification: jobSeekerProfiles.verificationStatus,
+      giverId: jobGiverProfiles.id,
       giverName: jobGiverProfiles.businessName,
+      giverVerification: jobGiverProfiles.verificationStatus,
     })
     .from(users)
     .leftJoin(jobSeekerProfiles, eq(jobSeekerProfiles.userId, users.id))

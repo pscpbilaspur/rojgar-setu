@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { approvers, locations, jobs, jobSeekerProfiles, jobGiverProfiles, reports } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { adminLogoutAction } from "@/app/actions/admin-auth";
+import { DashboardHeader, StatCard, NavCard } from "@/components/ui";
 
 export default async function AdminDashboardPage() {
   const session = await requireAdmin();
@@ -25,17 +26,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-xl font-bold text-[var(--ink)]">Central Admin</h1>
-          <p className="text-sm text-[var(--ink-muted)]">{session.username}</p>
-        </div>
-        <form action={adminLogoutAction}>
-          <button type="submit" className="text-sm underline text-[var(--ink-muted)]">
-            Log out
-          </button>
-        </form>
-      </div>
+      <DashboardHeader title="Central Admin" subtitle={session.username} logoutAction={adminLogoutAction} />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <StatCard label="Job Seekers" value={seekerCount.n} />
@@ -68,40 +59,15 @@ export default async function AdminDashboardPage() {
       </div>
 
       <nav className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <AdminNavCard href="/admin/users" label="Users" />
-        <AdminNavCard href="/admin/approvers" label="Approvers & Districts" />
-        <AdminNavCard href="/admin/moderation" label="Job Moderation" />
-        <AdminNavCard href="/admin/reports" label="Reports" />
-        <AdminNavCard href="/admin/suggestions" label="Suggestions" />
-        <AdminNavCard href="/admin/audit-log" label="Audit Log" />
-        <AdminNavCard href="/admin/import" label="Import Seekers (CSV)" />
-        <AdminNavCard href="/admin/import-givers" label="Import Givers (CSV)" />
+        <NavCard href="/admin/users" label="Users" icon="👥" />
+        <NavCard href="/admin/approvers" label="Approvers & Districts" icon="🧭" />
+        <NavCard href="/admin/moderation" label="Job Moderation" icon="🛠️" />
+        <NavCard href="/admin/reports" label="Reports" icon="🚩" />
+        <NavCard href="/admin/suggestions" label="Suggestions" icon="💡" />
+        <NavCard href="/admin/audit-log" label="Audit Log" icon="📜" />
+        <NavCard href="/admin/import" label="Import Seekers (CSV)" icon="⬆️" />
+        <NavCard href="/admin/import-givers" label="Import Givers (CSV)" icon="⬆️" />
       </nav>
     </div>
-  );
-}
-
-function StatCard({ label, value, href }: { label: string; value: number; href?: string }) {
-  const inner = (
-    <div
-      className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4 text-center"
-      style={{ boxShadow: "var(--shadow)" }}
-    >
-      <div className="text-2xl font-bold text-[var(--ink)]">{value}</div>
-      <div className="text-xs text-[var(--ink-muted)] mt-1">{label}</div>
-    </div>
-  );
-  return href ? <Link href={href}>{inner}</Link> : inner;
-}
-
-function AdminNavCard({ href, label }: { href: string; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4 text-center font-medium text-[var(--ink)] hover:border-[var(--accent)]"
-      style={{ boxShadow: "var(--shadow)" }}
-    >
-      {label}
-    </Link>
   );
 }

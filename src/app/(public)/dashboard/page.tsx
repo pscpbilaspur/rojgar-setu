@@ -1,13 +1,18 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { eq, and, sql } from "drizzle-orm";
 import { requireUser } from "@/lib/dal";
 import { logoutAction } from "@/app/actions/auth";
 import { getUnreadCount } from "@/lib/queries/notifications";
+import { db } from "@/db";
+import { applications, jobs } from "@/db/schema";
+import { DashboardHeader, StatCard, NavCard, StatusBadge } from "@/components/ui";
 
-const VERIFICATION_LABEL: Record<string, { text: string; cls: string }> = {
-  pending: { text: "Verification pending", cls: "bg-[var(--warn-soft)] text-[var(--ink)]" },
-  confirmed: { text: "Verified", cls: "bg-[var(--ok-soft)] text-[var(--ok)]" },
-  unable_to_confirm: { text: "Unable to confirm", cls: "bg-[var(--danger-soft)] text-[var(--danger)]" },
+const VERIFICATION_LABEL: Record<string, string> = {
+  pending: "Verification pending",
+  confirmed: "Verified",
+  unable_to_confirm: "Unable to confirm",
+  not_yet_done: "Basic Verification not yet done",
 };
 
 export default async function DashboardPage() {
@@ -19,59 +24,78 @@ export default async function DashboardPage() {
 
   const unreadCount = await getUnreadCount(user.id);
 
+  const [applicationCount, jobCount, openJobCount] = await Promise.all([
+    seekerProfile
+      ? db
+          .select({ n: sql<number>`count(*)::int` })
+          .from(applications)
+          .where(eq(applications.seekerId, seekerProfile.id))
+          .then((r) => r[0].n)
+      : Promise.resolve(0),
+    giverProfile
+      ? db
+          .select({ n: sql<number>`count(*)::int` })
+          .from(jobs)
+          .where(eq(jobs.giverId, giverProfile.id))
+          .then((r) => r[0].n)
+      : Promise.resolve(0),
+    giverProfile
+      ? db
+          .select({ n: sql<number>`count(*)::int` })
+          .from(jobs)
+          .where(and(eq(jobs.giverId, giverProfile.id), eq(jobs.status, "open")))
+          .then((r) => r[0].n)
+      : Promise.resolve(0),
+  ]);
+
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl font-bold text-[var(--ink)]">Dashboard</h1>
-        <form action={logoutAction}>
-          <button type="submit" className="text-sm underline text-[var(--ink-muted)]">Log out</button>
-        </form>
-      </div>
-      <p className="text-sm text-[var(--ink-muted)]">Mobile: {user.mobile}</p>
-      <div className="flex gap-4">
-        <Link href="/dashboard/messages" className="text-sm underline text-[var(--accent-ink)]">
-          💬 Messages
-        </Link>
-        <Link href="/dashboard/notifications" className="text-sm underline text-[var(--accent-ink)]">
-          🔔 Notifications{unreadCount > 0 ? ` (${unreadCount})` : ""}
-        </Link>
+    <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
+      <DashboardHeader title="Dashboard" subtitle={`Mobile: ${user.mobile}`} logoutAction={logoutAction} />
+
+      <div className="grid grid-cols-2 gap-3">
+        <NavCard href="/dashboard/messages" label="Messages" icon="💬" />
+        <NavCard href="/dashboard/notifications" label={`Notifications${unreadCount > 0 ? ` (${unreadCount})` : ""}`} icon="🔔" />
       </div>
 
       {seekerProfile && (
-        <section
-          className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4"
-          style={{ boxShadow: "var(--shadow)" }}
-        >
-          <div className="flex justify-between items-start">
+        <section>
+          <div className="flex justify-between items-center mb-3">
             <h2 className="font-semibold text-[var(--ink)]">Job Seeker — {seekerProfile.name}</h2>
-            <span className={`text-xs px-2 py-1 rounded-full ${VERIFICATION_LABEL[seekerProfile.verificationStatus]?.cls ?? ""}`}>
-              {VERIFICATION_LABEL[seekerProfile.verificationStatus]?.text ?? seekerProfile.verificationStatus}
-            </span>
+            <StatusBadge
+              status={seekerProfile.verificationStatus}
+              label={VERIFICATION_LABEL[seekerProfile.verificationStatus] ?? seekerProfile.verificationStatus}
+            />
           </div>
-          <div className="flex flex-wrap gap-2 mt-3">
-            <Link href="/jobs" className="text-sm underline text-[var(--accent-ink)]">Find Jobs</Link>
-            <Link href="/dashboard/applications" className="text-sm underline text-[var(--accent-ink)]">My Applications</Link>
-            <Link href="/dashboard/profile" className="text-sm underline text-[var(--accent-ink)]">Edit Profile</Link>
-            <Link href="/dashboard/privacy" className="text-sm underline text-[var(--accent-ink)]">Privacy Settings</Link>
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <StatCard label="Applications Sent" value={applicationCount} href="/dashboard/applications" />
+            <StatCard label="Verification" value={seekerProfile.verificationStatus === "confirmed" ? "✓" : "…"} />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <NavCard href="/jobs" label="Find Jobs" icon="🔍" />
+            <NavCard href="/dashboard/applications" label="My Applications" icon="📄" />
+            <NavCard href="/dashboard/profile" label="Edit Profile" icon="✏️" />
+            <NavCard href="/dashboard/privacy" label="Privacy Settings" icon="🔒" />
           </div>
         </section>
       )}
 
       {giverProfile && (
-        <section
-          className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4"
-          style={{ boxShadow: "var(--shadow)" }}
-        >
-          <div className="flex justify-between items-start">
+        <section>
+          <div className="flex justify-between items-center mb-3">
             <h2 className="font-semibold text-[var(--ink)]">Job Giver — {giverProfile.businessName}</h2>
-            <span className={`text-xs px-2 py-1 rounded-full ${VERIFICATION_LABEL[giverProfile.verificationStatus]?.cls ?? ""}`}>
-              {VERIFICATION_LABEL[giverProfile.verificationStatus]?.text ?? giverProfile.verificationStatus}
-            </span>
+            <StatusBadge
+              status={giverProfile.verificationStatus}
+              label={VERIFICATION_LABEL[giverProfile.verificationStatus] ?? giverProfile.verificationStatus}
+            />
           </div>
-          <div className="flex flex-wrap gap-2 mt-3">
-            <Link href="/giver/jobs" className="text-sm underline text-[var(--accent-ink)]">My Jobs</Link>
-            <Link href="/giver/jobs/new" className="text-sm underline text-[var(--accent-ink)]">Post a Job</Link>
-            <Link href="/dashboard/business-profile" className="text-sm underline text-[var(--accent-ink)]">Edit Business Profile</Link>
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <StatCard label="Jobs Posted" value={jobCount} href="/giver/jobs" />
+            <StatCard label="Currently Open" value={openJobCount} href="/giver/jobs" />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <NavCard href="/giver/jobs" label="My Jobs" icon="📋" />
+            <NavCard href="/giver/jobs/new" label="Post a Job" icon="➕" />
+            <NavCard href="/dashboard/business-profile" label="Edit Business Profile" icon="✏️" />
           </div>
         </section>
       )}

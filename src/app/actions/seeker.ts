@@ -24,7 +24,10 @@ const seekerSchema = z.object({
   expectedSalary: z.string().trim().max(60).optional(),
   jobType: z.enum(["full_time", "part_time", "wfh"]),
   preferredLocationIds: z.array(z.coerce.number().int().positive()).min(1),
-  approverId: z.coerce.number().int().positive(),
+  // Optional — Section 4.2: Approver selection is always optional and
+  // skippable, and must never block account creation, including when a
+  // district has no Approver assigned yet at all.
+  approverId: z.coerce.number().int().positive().optional(),
   contactSharePolicy: z.enum(["never", "on_application", "always"]),
 });
 
@@ -60,6 +63,10 @@ export async function createSeekerProfileAction(
         expectedSalary: data.expectedSalary,
         jobType: data.jobType,
         approverId: data.approverId,
+        // No Approver picked (skipped, or none exists in this district yet)
+        // -> stays "not_yet_done", never left on the default "pending" which
+        // would misleadingly imply someone is actually working on it.
+        verificationStatus: data.approverId ? "pending" : "not_yet_done",
         contactSharePolicy: data.contactSharePolicy,
       })
       .returning();
@@ -77,12 +84,14 @@ export async function createSeekerProfileAction(
       }))
     );
 
-    await tx.insert(verificationRequests).values({
-      profileType: "seeker",
-      profileId: profile.id,
-      approverId: data.approverId,
-      status: "pending",
-    });
+    if (data.approverId) {
+      await tx.insert(verificationRequests).values({
+        profileType: "seeker",
+        profileId: profile.id,
+        approverId: data.approverId,
+        status: "pending",
+      });
+    }
   });
 
   redirect("/dashboard");

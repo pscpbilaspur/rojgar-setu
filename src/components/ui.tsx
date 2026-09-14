@@ -1,3 +1,89 @@
+import Link from "next/link";
+
+/**
+ * Shared dashboard building blocks — one visual standard reused across the
+ * Job Seeker/Giver dashboard, the Admin dashboard, and the Approver
+ * dashboard, so all four panels look and behave the same way (same header
+ * row + logout, same stat tiles, same nav-card grid, same status pill
+ * colors) instead of each panel inventing its own layout.
+ */
+
+export function DashboardHeader({
+  title,
+  subtitle,
+  logoutAction,
+}: {
+  title: string;
+  subtitle?: string;
+  logoutAction: () => Promise<void>;
+}) {
+  return (
+    <div className="flex justify-between items-center mb-6">
+      <div>
+        <h1 className="text-xl font-bold text-[var(--ink)]">{title}</h1>
+        {subtitle && <p className="text-sm text-[var(--ink-muted)] mt-0.5">{subtitle}</p>}
+      </div>
+      <form action={logoutAction}>
+        <button type="submit" className="text-sm underline text-[var(--ink-muted)] shrink-0">
+          Log out
+        </button>
+      </form>
+    </div>
+  );
+}
+
+export function StatCard({ label, value, href }: { label: string; value: number | string; href?: string }) {
+  const inner = (
+    <div
+      className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4 text-center h-full"
+      style={{ boxShadow: "var(--shadow)" }}
+    >
+      <div className="text-2xl font-bold text-[var(--ink)]">{value}</div>
+      <div className="text-xs text-[var(--ink-muted)] mt-1">{label}</div>
+    </div>
+  );
+  return href ? (
+    <Link href={href} className="block">
+      {inner}
+    </Link>
+  ) : (
+    inner
+  );
+}
+
+export function NavCard({ href, label, icon }: { href: string; label: string; icon?: string }) {
+  return (
+    <Link
+      href={href}
+      className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4 text-center font-medium text-[var(--ink)] hover:border-[var(--accent)] flex flex-col items-center justify-center gap-1 min-h-[76px]"
+      style={{ boxShadow: "var(--shadow)" }}
+    >
+      {icon && <span className="text-lg">{icon}</span>}
+      <span className="text-sm">{label}</span>
+    </Link>
+  );
+}
+
+const STATUS_BADGE_STYLES: Record<string, string> = {
+  confirmed: "bg-[var(--ok-soft)] text-[var(--ok)]",
+  active: "bg-[var(--ok-soft)] text-[var(--ok)]",
+  open: "bg-[var(--ok-soft)] text-[var(--ok)]",
+  pending: "bg-[var(--warn-soft)] text-[var(--ink)]",
+  not_yet_done: "bg-[var(--surface)] text-[var(--ink-muted)] border border-[var(--border)]",
+  unable_to_confirm: "bg-[var(--danger-soft)] text-[var(--danger)]",
+  suspended: "bg-[var(--danger-soft)] text-[var(--danger)]",
+  inactive: "bg-[var(--danger-soft)] text-[var(--danger)]",
+  closed: "bg-[var(--danger-soft)] text-[var(--danger)]",
+};
+
+export function StatusBadge({ status, label }: { status: string; label?: string }) {
+  return (
+    <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${STATUS_BADGE_STYLES[status] ?? "bg-[var(--surface)] text-[var(--ink-muted)] border border-[var(--border)]"}`}>
+      {label ?? status}
+    </span>
+  );
+}
+
 /**
  * A native, no-JS collapsible section (the browser's own <details>/<summary>
  * disclosure widget) — used for secondary homepage content (Our Purpose, How
