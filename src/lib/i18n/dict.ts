@@ -82,6 +82,7 @@ export const dict = {
     home_step3Title: "खुद निर्णय लें",
     home_step3Sub: "Rojgar Setu नौकरी की गारंटी नहीं देता।",
     home_noJobsYet: "अभी कोई नौकरी पोस्ट नहीं हुई है।",
+    home_postFirstJobCta: "सबसे पहले नौकरी पोस्ट करें →",
   },
   en: {
     nav_findJobs: "Find Jobs",
@@ -158,6 +159,7 @@ export const dict = {
     home_step3Title: "Decide for yourself",
     home_step3Sub: "Rojgar Setu does not guarantee employment.",
     home_noJobsYet: "No jobs have been posted yet.",
+    home_postFirstJobCta: "Post the first job →",
   },
 } as const;
 

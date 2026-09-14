@@ -10,11 +10,11 @@ export async function SiteHeader() {
 
   return (
     <header className="border-b border-[var(--border)] bg-[var(--surface)]">
-      <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-        <Link href="/">
+      <div className="max-w-5xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
+        <Link href="/" className="min-w-0">
           <BrandHeaderLockup />
         </Link>
-        <nav className="flex items-center gap-4 text-sm">
+        <nav className="flex items-center gap-2 sm:gap-4 text-sm shrink-0">
           <Link href="/jobs" className="hidden sm:inline text-[var(--ink-muted)] hover:text-[var(--ink)]">
             {t("nav_findJobs")}
           </Link>
@@ -28,14 +28,14 @@ export async function SiteHeader() {
           {current ? (
             <Link
               href="/dashboard"
-              className="px-3 py-1.5 rounded-md bg-[var(--accent)] text-white font-medium"
+              className="px-2.5 py-1.5 sm:px-3 rounded-md bg-[var(--accent)] text-white font-medium text-[13px] sm:text-sm whitespace-nowrap"
             >
               {t("nav_dashboard")}
             </Link>
           ) : (
             <Link
               href="/login"
-              className="px-3 py-1.5 rounded-md bg-[var(--accent)] text-white font-medium"
+              className="px-2.5 py-1.5 sm:px-3 rounded-md bg-[var(--accent)] text-white font-medium text-[13px] sm:text-sm whitespace-nowrap"
             >
               {t("nav_login")}
             </Link>

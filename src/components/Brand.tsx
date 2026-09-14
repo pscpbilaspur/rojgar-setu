@@ -6,28 +6,36 @@ import Image from "next/image";
 export const ORG_NAME_HI = "पूज्य सिंधी सेंट्रल पंचायत बिलासपुर";
 export const PLATFORM_NAME_HI = "सेंट्रल पंचायत रोजगार सेतु";
 
-export function BrandMark({ size = 36 }: { size?: number }) {
+export function BrandMark({ size = 36, className }: { size?: number; className?: string }) {
   return (
     <Image
       src="/pscp-logo.png"
       alt="Pujya Sindhi Central Panchayat Bilaspur"
       width={size}
       height={Math.round(size * (700 / 571))}
+      className={className}
       priority
     />
   );
 }
 
-/** Compact header lockup: logo + the two fixed lines, stacked. */
+/**
+ * Compact header lockup: logo + the two fixed brand lines, stacked. Sized
+ * down on narrow (mobile) screens — the full org name is long, and at the
+ * header's fixed 15px/13px it was wrapping to 3 lines and crowding the
+ * Login/Register button. The two brand lines still always render (never
+ * hidden), per the "always Hindi, always visible" naming rule — only their
+ * size and the logo's size step down below the `sm` breakpoint.
+ */
 export function BrandHeaderLockup() {
   return (
-    <div className="flex items-center gap-3">
-      <BrandMark size={40} />
-      <div>
-        <div className="text-[15px] font-bold text-[var(--ink)] leading-tight">
+    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+      <BrandMark size={40} className="w-8 h-auto sm:w-10 shrink-0" />
+      <div className="min-w-0">
+        <div className="text-[12px] sm:text-[15px] font-bold text-[var(--ink)] leading-tight">
           {ORG_NAME_HI} (छ.ग.)
         </div>
-        <div className="text-[13px] font-semibold text-[var(--accent-ink)] leading-tight mt-0.5">
+        <div className="text-[11px] sm:text-[13px] font-semibold text-[var(--accent-ink)] leading-tight mt-0.5">
           {PLATFORM_NAME_HI}
         </div>
       </div>

@@ -37,41 +37,43 @@ export default async function HomePage() {
   return (
     <div className="max-w-5xl mx-auto px-4">
       {/* Hero */}
-      <section className="pt-9 pb-8 text-center">
+      <section className="pt-6 pb-6 sm:pt-9 sm:pb-8 text-center">
         <BrandHeroLockup />
-        <p className="max-w-[56ch] mx-auto mt-3 text-[var(--ink-muted)]">
+        <p className="max-w-[56ch] mx-auto mt-3 text-[14px] sm:text-base text-[var(--ink-muted)]">
           {t("home_heroSubtitle")}
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-7">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-5 sm:mt-7">
           {actionTiles.map((tile) => (
             <Link
               key={tile.href}
               href={tile.href}
-              className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4 text-left transition-transform hover:-translate-y-0.5"
+              className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-3.5 sm:p-4 text-left transition-transform active:scale-[0.98] hover:-translate-y-0.5"
               style={{ boxShadow: "var(--shadow)" }}
             >
               <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-lg mb-2"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-base sm:text-lg mb-2"
                 style={{ background: tile.v === "a" ? "var(--accent-soft)" : "var(--accent2-soft)" }}
               >
                 {tile.icon}
               </div>
-              <h4 className="font-semibold text-[var(--ink)] text-[15px]">{tile.title}</h4>
-              <p className="text-[13px] text-[var(--ink-muted)] mt-1">{tile.sub}</p>
+              <h4 className="font-semibold text-[var(--ink)] text-[14px] sm:text-[15px] leading-snug">
+                {tile.title}
+              </h4>
+              <p className="text-[12px] sm:text-[13px] text-[var(--ink-muted)] mt-1 leading-snug">{tile.sub}</p>
             </Link>
           ))}
         </div>
       </section>
 
       {/* Purpose */}
-      <section className="py-6">
-        <h2 className="text-center text-[23px] font-bold text-[var(--ink)]">
+      <section className="py-5 sm:py-6">
+        <h2 className="text-center text-[19px] sm:text-[23px] font-bold text-[var(--ink)]">
           {t("home_purposeTitle")}
         </h2>
-        <p className="max-w-[70ch] mx-auto mt-3 text-center text-[var(--ink-muted)] leading-relaxed">
+        <p className="max-w-[70ch] mx-auto mt-2.5 sm:mt-3 text-center text-[14px] sm:text-base text-[var(--ink-muted)] leading-relaxed">
           {t("home_purposeLead")}
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-5 sm:mt-6">
           {features.map((f) => (
             <FeatureCard key={f.title} icon={f.icon} title={f.title} sub={f.sub} variant={f.v} />
           ))}
@@ -79,11 +81,11 @@ export default async function HomePage() {
       </section>
 
       {/* How it works */}
-      <section className="py-8 -mx-4 px-4 bg-[var(--surface-2)] rounded-[var(--radius)]">
-        <h2 className="text-center text-[23px] font-bold text-[var(--ink)]">
+      <section className="py-6 sm:py-8 -mx-4 px-4 bg-[var(--surface-2)] rounded-[var(--radius)]">
+        <h2 className="text-center text-[19px] sm:text-[23px] font-bold text-[var(--ink)]">
           {t("home_howItWorks")}
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 mt-5 sm:mt-6 max-w-4xl mx-auto">
           {steps.map((s) => (
             <StepCard key={s.num} num={s.num} title={s.title} sub={s.sub} />
           ))}
@@ -91,10 +93,18 @@ export default async function HomePage() {
       </section>
 
       {/* Recent jobs */}
-      <section className="py-8">
-        <h2 className="text-[20px] font-bold text-[var(--ink)]">{t("home_recentJobs")}</h2>
+      <section className="py-6 sm:py-8">
+        <h2 className="text-[18px] sm:text-[20px] font-bold text-[var(--ink)]">{t("home_recentJobs")}</h2>
         {recentJobs.length === 0 ? (
-          <p className="text-[var(--ink-muted)] mt-3">{t("home_noJobsYet")}</p>
+          <div className="mt-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-[var(--radius)] p-5 text-center">
+            <p className="text-[14px] sm:text-base text-[var(--ink-muted)]">{t("home_noJobsYet")}</p>
+            <Link
+              href="/register?role=giver"
+              className="inline-block mt-3 text-[14px] font-semibold text-[var(--accent-ink)] underline underline-offset-2"
+            >
+              {t("home_postFirstJobCta")}
+            </Link>
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
             {recentJobs.map((job) => (
