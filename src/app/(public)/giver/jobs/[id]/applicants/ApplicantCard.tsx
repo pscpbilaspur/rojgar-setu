@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { decideApplicationAction } from "@/app/actions/jobs";
 import type { ApplicantRow } from "@/lib/queries/applicants";
+import { StatusBadge } from "@/components/ui";
 
 export function ApplicantCard({ applicant }: { applicant: ApplicantRow }) {
   const [status, setStatus] = useState(applicant.status);
@@ -36,17 +37,10 @@ export function ApplicantCard({ applicant }: { applicant: ApplicantRow }) {
             View full profile
           </Link>
         </div>
-        <span
-          className={`text-xs px-2 py-1 rounded-full ${
-            status === "shortlisted"
-              ? "bg-[var(--ok-soft)] text-[var(--ok)]"
-              : status === "not_a_fit"
-              ? "bg-[var(--danger-soft)] text-[var(--danger)]"
-              : "bg-[var(--surface-2)] text-[var(--ink-muted)]"
-          }`}
-        >
-          {status === "sent" ? "New" : status === "shortlisted" ? "Shortlisted" : "Not a fit"}
-        </span>
+        <StatusBadge
+          status={status}
+          label={status === "sent" ? "New" : status === "shortlisted" ? "Shortlisted" : "Not a fit"}
+        />
       </div>
       {status === "sent" && (
         <div className="flex gap-2 mt-3">

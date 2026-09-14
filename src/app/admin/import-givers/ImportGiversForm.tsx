@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { importGiversAction, type ImportResult } from "@/app/actions/admin-import-givers";
+import { inputCls } from "@/components/ui";
 
 type District = { id: number; district: string };
 type Approver = { id: number; name: string; districtId: number };
@@ -61,9 +62,6 @@ export function ImportGiversForm({
       setIsPending(false);
     }
   }
-
-  const inputCls =
-    "w-full border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-[var(--ink)] text-sm";
 
   return (
     <div className="space-y-3">

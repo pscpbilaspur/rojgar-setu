@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createApproverAction } from "@/app/actions/admin";
+import { inputCls } from "@/components/ui";
 
 export function NewApproverForm({ districts }: { districts: { id: number; district: string }[] }) {
   const router = useRouter();
@@ -26,8 +27,6 @@ export function NewApproverForm({ districts }: { districts: { id: number; distri
       router.refresh();
     });
   }
-
-  const inputCls = "w-full border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-[var(--ink)] text-sm";
 
   return (
     <div className="space-y-2">

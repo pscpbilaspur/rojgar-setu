@@ -9,6 +9,28 @@ import { AccountMenu, type AccountMenuItem } from "@/components/AccountMenu";
  * colors) instead of each panel inventing its own layout.
  */
 
+/**
+ * The one input/select/textarea style used by every form in the app
+ * (registration, edit-profile, post-a-job, and the Admin utility forms).
+ * Previously each form file defined its own identical copy of this string —
+ * two of them had already quietly drifted (an extra `text-sm`) — so this is
+ * the single source of truth now; every form imports it instead of
+ * redefining it.
+ */
+export const inputCls =
+  "w-full border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-[var(--ink)]";
+
+/** A form field's label + control, stacked — the label wrapper every form
+ * in the app uses around its inputs/selects/textareas. */
+export function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-[var(--ink)] mb-1">{label}</label>
+      {children}
+    </div>
+  );
+}
+
 export function DashboardHeader({
   title,
   subtitle,
@@ -71,12 +93,15 @@ const STATUS_BADGE_STYLES: Record<string, string> = {
   confirmed: "bg-[var(--ok-soft)] text-[var(--ok)]",
   active: "bg-[var(--ok-soft)] text-[var(--ok)]",
   open: "bg-[var(--ok-soft)] text-[var(--ok)]",
+  shortlisted: "bg-[var(--ok-soft)] text-[var(--ok)]",
   pending: "bg-[var(--warn-soft)] text-[var(--ink)]",
   not_yet_done: "bg-[var(--surface)] text-[var(--ink-muted)] border border-[var(--border)]",
+  sent: "bg-[var(--surface-2)] text-[var(--ink-muted)]",
   unable_to_confirm: "bg-[var(--danger-soft)] text-[var(--danger)]",
   suspended: "bg-[var(--danger-soft)] text-[var(--danger)]",
   inactive: "bg-[var(--danger-soft)] text-[var(--danger)]",
   closed: "bg-[var(--danger-soft)] text-[var(--danger)]",
+  not_a_fit: "bg-[var(--danger-soft)] text-[var(--danger)]",
 };
 
 export function StatusBadge({ status, label }: { status: string; label?: string }) {

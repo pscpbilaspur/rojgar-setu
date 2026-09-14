@@ -3,19 +3,50 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toggleUserStatusAction, setProfileVerificationAction } from "@/app/actions/admin";
+import { StatusBadge } from "@/components/ui";
 
-function verificationBadgeCls(v: string | null) {
-  if (v === "confirmed") return "bg-[var(--ok-soft)] text-[var(--ok)]";
-  if (v === "unable_to_confirm") return "bg-[var(--danger-soft)] text-[var(--danger)]";
-  if (v === "pending") return "bg-[var(--warn-soft,#fef3c7)] text-[var(--warn,#92400e)]";
-  return "bg-[var(--surface-muted,#f1f1f1)] text-[var(--ink-muted)]";
-}
-
+// Colors come from the shared StatusBadge (ui.tsx) now — this only supplies
+// the Admin-specific label text ("Pending (Approver)" reads clearer here
+// than the plain "Pending" used elsewhere).
 function verificationLabel(v: string | null) {
   if (v === "confirmed") return "Confirmed";
   if (v === "unable_to_confirm") return "Unable to confirm";
   if (v === "pending") return "Pending (Approver)";
   return "Not yet done";
+}
+
+/** A small solid action pill — the same visual weight as the Confirm/Reject
+ * buttons on VerificationCard and Shortlist/Not-a-fit on ApplicantCard, just
+ * sized for a compact table cell instead of a full-width card. Previously
+ * this table's actions were plain underlined text, a lighter weight than
+ * every other status-changing button in the app. */
+function ActionPill({
+  tone,
+  disabled,
+  onClick,
+  children,
+}: {
+  tone: "ok" | "danger" | "muted";
+  disabled?: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  const toneCls =
+    tone === "ok"
+      ? "bg-[var(--ok)] text-white"
+      : tone === "danger"
+      ? "bg-[var(--danger)] text-white"
+      : "bg-[var(--surface-2)] text-[var(--ink)]";
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={`text-xs px-2 py-1 rounded-md font-medium disabled:opacity-60 ${toneCls}`}
+    >
+      {children}
+    </button>
+  );
 }
 
 function ProfileVerification({
@@ -42,41 +73,26 @@ function ProfileVerification({
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1.5">
       <span>{name ?? "—"}</span>
-      <span className={`text-xs px-2 py-0.5 rounded-full w-fit ${verificationBadgeCls(verification)}`}>
-        {verificationLabel(verification)}
-      </span>
-      <div className="flex gap-2">
+      <div className="w-fit">
+        <StatusBadge status={verification ?? "not_yet_done"} label={verificationLabel(verification)} />
+      </div>
+      <div className="flex gap-1.5 flex-wrap">
         {verification !== "confirmed" && (
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => act("confirmed")}
-            className="text-xs underline text-[var(--ok)]"
-          >
+          <ActionPill tone="ok" disabled={isPending} onClick={() => act("confirmed")}>
             Approve
-          </button>
+          </ActionPill>
         )}
         {verification !== "unable_to_confirm" && (
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => act("unable_to_confirm")}
-            className="text-xs underline text-[var(--danger)]"
-          >
+          <ActionPill tone="danger" disabled={isPending} onClick={() => act("unable_to_confirm")}>
             Reject
-          </button>
+          </ActionPill>
         )}
         {verification !== "not_yet_done" && (
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => act("not_yet_done")}
-            className="text-xs underline text-[var(--ink-muted)]"
-          >
+          <ActionPill tone="muted" disabled={isPending} onClick={() => act("not_yet_done")}>
             Reset
-          </button>
+          </ActionPill>
         )}
       </div>
     </div>
@@ -117,19 +133,16 @@ export function UserRow({
         <ProfileVerification profileType="giver" profileId={giverId} verification={giverVerification} name={giverName} />
       </td>
       <td className="py-2 px-2">
-        <span className={`text-xs px-2 py-0.5 rounded-full ${status === "active" ? "bg-[var(--ok-soft)] text-[var(--ok)]" : "bg-[var(--danger-soft)] text-[var(--danger)]"}`}>
-          {status}
-        </span>
+        <StatusBadge status={status} />
       </td>
       <td className="py-2 px-2">
-        <button
-          type="button"
+        <ActionPill
+          tone={status === "active" ? "danger" : "ok"}
           disabled={isPending}
           onClick={() => startTransition(async () => { await toggleUserStatusAction(id); router.refresh(); })}
-          className="text-xs underline text-[var(--ink-muted)]"
         >
           {status === "active" ? "Suspend" : "Reactivate"}
-        </button>
+        </ActionPill>
       </td>
     </tr>
   );

@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateSeekerProfileAction } from "@/app/actions/seeker";
+import { Field, inputCls } from "@/components/ui";
 
 type Lookup = { id: number; label: string };
 type District = { id: number; district: string; isRemote: boolean };
@@ -184,17 +185,6 @@ export function EditSeekerForm({
       >
         Save changes
       </button>
-    </div>
-  );
-}
-
-const inputCls = "w-full border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-[var(--ink)]";
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-[var(--ink)] mb-1">{label}</label>
-      {children}
     </div>
   );
 }

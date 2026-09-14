@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { createGiverProfileAction } from "@/app/actions/giver";
 import { getApproversForDistrictAction } from "@/app/actions/lookups";
 import { JOB_CATEGORIES } from "@/db/seed-data/districts";
+import { Field, inputCls } from "@/components/ui";
 
 type Approver = { id: number; name: string };
 
@@ -66,18 +67,16 @@ export function GiverOnboardingForm({
     });
   }
 
-  const inputCls = "w-full border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-[var(--ink)]";
-
   if (step === 1) {
     return (
       <div className="space-y-3">
-        <Field label="Business name" cls={inputCls}>
+        <Field label="Business name">
           <input value={businessName} onChange={(e) => setBusinessName(e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Contact person" cls={inputCls}>
+        <Field label="Contact person">
           <input value={contactPersonName} onChange={(e) => setContactPersonName(e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Category" cls={inputCls}>
+        <Field label="Category">
           <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputCls}>
             <option value="">Select category</option>
             {JOB_CATEGORIES.map((c) => (
@@ -94,7 +93,7 @@ export function GiverOnboardingForm({
             className={inputCls}
           />
         )}
-        <Field label="State" cls={inputCls}>
+        <Field label="State">
           <select
             value={locationState}
             onChange={(e) => {
@@ -108,7 +107,7 @@ export function GiverOnboardingForm({
             ))}
           </select>
         </Field>
-        <Field label="District" cls={inputCls}>
+        <Field label="District">
           <select value={locationId} onChange={(e) => setLocationId(e.target.value ? Number(e.target.value) : "")} className={inputCls}>
             <option value="">Select district</option>
             {locationDistrictOptions.map((d) => (
@@ -116,10 +115,10 @@ export function GiverOnboardingForm({
             ))}
           </select>
         </Field>
-        <Field label="About the business (optional)" cls={inputCls}>
+        <Field label="About the business (optional)">
           <textarea value={about} onChange={(e) => setAbout(e.target.value)} className={inputCls} rows={2} />
         </Field>
-        <Field label="Website / social (optional)" cls={inputCls}>
+        <Field label="Website / social (optional)">
           <input value={website} onChange={(e) => setWebsite(e.target.value)} className={inputCls} />
         </Field>
         <button
@@ -136,7 +135,7 @@ export function GiverOnboardingForm({
 
   return (
     <div className="space-y-3">
-      <Field label="Select an Approver in your district" cls={inputCls}>
+      <Field label="Select an Approver in your district">
         <p className="text-xs text-[var(--ink-muted)] mb-2">
           An Approver personally vouches for real businesses, to keep fake profiles off the platform — so pick
           someone here only if they'd actually recognize you or your business, like a known community member,
@@ -182,15 +181,6 @@ export function GiverOnboardingForm({
           Submit
         </button>
       </div>
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode; cls: string }) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-[var(--ink)] mb-1">{label}</label>
-      {children}
     </div>
   );
 }

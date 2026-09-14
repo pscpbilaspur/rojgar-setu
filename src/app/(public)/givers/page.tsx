@@ -16,7 +16,7 @@ export default async function GiversPage({
   ]);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-5xl mx-auto px-4 py-8">
       <h1 className="text-xl font-bold text-[var(--ink)] mb-4">Find Job Givers</h1>
 
       <form className="flex flex-wrap gap-2 mb-6" method="get">
@@ -34,7 +34,7 @@ export default async function GiversPage({
       {givers.length === 0 ? (
         <p className="text-[var(--ink-muted)]">No job givers match these filters yet.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {givers.map((g) => (
             <Link
               key={g.id}

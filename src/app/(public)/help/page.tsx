@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getTranslations } from "@/lib/i18n";
 import { Card } from "@/components/ui";
 
@@ -55,9 +54,6 @@ export default async function HelpPage() {
           </Card>
         ))}
       </div>
-      <Link href="/" className="inline-block mt-4 text-sm underline text-[var(--accent-ink)]">
-        ← {lang === "hi" ? "होम" : "Home"}
-      </Link>
     </div>
   );
 }

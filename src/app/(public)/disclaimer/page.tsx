@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getTranslations } from "@/lib/i18n";
 import { Card } from "@/components/ui";
 
@@ -22,9 +21,6 @@ export default async function DisclaimerPage() {
             : "Rojgar Setu will not be responsible for any incorrect, incomplete or misleading information, personal promises/commitments, mutual transactions, or any outcome arising from them. The final decision, and the responsibility for it, rests entirely with the parties involved."}
         </p>
       </Card>
-      <Link href="/" className="inline-block mt-4 text-sm underline text-[var(--accent-ink)]">
-        ← {lang === "hi" ? "होम" : "Home"}
-      </Link>
     </div>
   );
 }

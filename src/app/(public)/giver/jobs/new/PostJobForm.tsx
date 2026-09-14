@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { postJobAction } from "@/app/actions/jobs";
+import { inputCls } from "@/components/ui";
 
 type Lookup = { id: number; label: string };
 
@@ -26,8 +27,6 @@ export function PostJobForm({
   const [salaryRange, setSalaryRange] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-
-  const inputCls = "w-full border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-[var(--ink)]";
 
   function submit() {
     setError(null);

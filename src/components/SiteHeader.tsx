@@ -36,7 +36,7 @@ export async function SiteHeader() {
             <>
               {identity && (
                 <span
-                  className="flex items-center gap-0.5 text-[12px] text-[var(--ink-faint)] truncate max-w-[70px] sm:max-w-[140px]"
+                  className="flex items-center gap-0.5 text-[12px] text-[var(--ink-faint)] truncate max-w-[112px] sm:max-w-[160px]"
                   title={identity}
                 >
                   <span aria-hidden>👤</span> {identity}
