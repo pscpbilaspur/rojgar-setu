@@ -12,6 +12,34 @@
   --danger: #B23A2E; --danger-soft: #F5DEDB;
   --shadow: 0 1px 2px rgba(20,30,26,.06), 0 6px 20px rgba(20,30,26,.06);
   --radius: 12px;
+
+  /* Fixed per-role brand colors — both light, matched in weight/saturation
+     to the rest of the palette. Used directly on the "choose your role"
+     screen (before anyone has a role to switch the site's accent by), and
+     also what [data-role="giver"] below swaps the whole site's --accent
+     trio to once a Job Giver is logged in, so their entire dashboard picks
+     it up too. Job Seeker's theme is just the site's existing default teal
+     accent, aliased here for symmetry with --giver-accent. */
+  --seeker-accent: var(--accent);
+  --seeker-accent-soft: var(--accent-soft);
+  --seeker-accent-ink: var(--accent-ink);
+  --giver-accent: #3B6EA5;
+  --giver-accent-soft: #DDE6F0;
+  --giver-accent-ink: #1F3F5C;
+}
+
+/* A Job Giver's whole logged-in experience uses the blue theme above
+   instead of the site's default teal — set once, on a wrapping element in
+   (public)/layout.tsx, based on the logged-in account's role. Every
+   component already reads var(--accent)/--accent-soft/--accent-ink rather
+   than a hardcoded color, so this alone re-themes buttons, links, chips
+   and highlights everywhere under it, with no per-component changes. Job
+   Seeker accounts get data-role="seeker" too, but it needs no override
+   here since it already matches the default. */
+[data-role="giver"] {
+  --accent: var(--giver-accent);
+  --accent-soft: var(--giver-accent-soft);
+  --accent-ink: var(--giver-accent-ink);
 }
 
 /* The site always uses the light palette from :root above, regardless of
