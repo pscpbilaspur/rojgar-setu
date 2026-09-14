@@ -237,20 +237,15 @@ export function SeekerOnboardingForm({
       {step === 3 && (
         <div className="space-y-3">
           <Field label="Job type">
-            <div className="flex gap-2 flex-wrap">
-              {(["full_time", "part_time", "wfh"] as const).map((jt) => (
-                <button
-                  key={jt}
-                  type="button"
-                  onClick={() => setJobType(jt)}
-                  className={`px-3 py-1.5 rounded-full border text-sm ${
-                    jobType === jt ? "bg-[var(--accent-soft)] border-[var(--accent)] text-[var(--accent-ink)]" : "border-[var(--border)]"
-                  }`}
-                >
-                  {jt === "full_time" ? "Full-time" : jt === "part_time" ? "Part-time" : "Work From Home"}
-                </button>
-              ))}
-            </div>
+            <select
+              value={jobType}
+              onChange={(e) => setJobType(e.target.value as "full_time" | "part_time" | "wfh")}
+              className={inputCls}
+            >
+              <option value="full_time">Full-time</option>
+              <option value="part_time">Part-time</option>
+              <option value="wfh">Work From Home</option>
+            </select>
           </Field>
           <Field label="Preferred districts (select one or more)">
             <div className="flex flex-wrap gap-2">
@@ -290,45 +285,33 @@ export function SeekerOnboardingForm({
                 No Approver is assigned to your district yet. Please check back later or contact support.
               </p>
             ) : (
-              <div className="space-y-2">
+              <select
+                value={approverId}
+                onChange={(e) => setApproverId(e.target.value ? Number(e.target.value) : "")}
+                className={inputCls}
+              >
+                <option value="">Select an Approver</option>
                 {approvers.map((a) => (
-                  <button
-                    type="button"
-                    key={a.id}
-                    onClick={() => setApproverId(a.id)}
-                    className={`w-full text-left px-3 py-2 rounded-md border ${
-                      approverId === a.id ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-[var(--border)]"
-                    }`}
-                  >
+                  <option key={a.id} value={a.id}>
                     {a.name}
-                  </button>
+                  </option>
                 ))}
-              </div>
+              </select>
             )}
             <p className="text-xs text-[var(--ink-faint)] mt-1">
               Pick someone who personally knows you or your work.
             </p>
           </Field>
           <Field label="Who can see your mobile number?">
-            <div className="flex flex-col gap-1.5">
-              {(
-                [
-                  ["never", "Never share it"],
-                  ["on_application", "Only when I apply / am contacted"],
-                  ["always", "Always visible to registered users"],
-                ] as const
-              ).map(([val, label]) => (
-                <label key={val} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="radio"
-                    name="contactShare"
-                    checked={contactSharePolicy === val}
-                    onChange={() => setContactSharePolicy(val)}
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
+            <select
+              value={contactSharePolicy}
+              onChange={(e) => setContactSharePolicy(e.target.value as "never" | "on_application" | "always")}
+              className={inputCls}
+            >
+              <option value="never">Never share it</option>
+              <option value="on_application">Only when I apply / am contacted</option>
+              <option value="always">Always visible to registered users</option>
+            </select>
             <p className="text-xs text-[var(--ink-faint)] mt-1">You can change this later in Privacy Settings.</p>
           </Field>
           {error && <p className="text-sm text-[var(--danger)]">{error}</p>}

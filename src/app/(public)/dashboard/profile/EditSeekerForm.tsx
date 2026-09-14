@@ -168,20 +168,15 @@ export function EditSeekerForm({
         <input value={expectedSalary} onChange={(e) => setExpectedSalary(e.target.value)} className={inputCls} />
       </Field>
       <Field label="Job type">
-        <div className="flex gap-2 flex-wrap">
-          {(["full_time", "part_time", "wfh"] as const).map((jt) => (
-            <button
-              key={jt}
-              type="button"
-              onClick={() => setJobType(jt)}
-              className={`px-3 py-1.5 rounded-full border text-sm ${
-                jobType === jt ? "bg-[var(--accent-soft)] border-[var(--accent)] text-[var(--accent-ink)]" : "border-[var(--border)]"
-              }`}
-            >
-              {jt === "full_time" ? "Full-time" : jt === "part_time" ? "Part-time" : "Work From Home"}
-            </button>
-          ))}
-        </div>
+        <select
+          value={jobType}
+          onChange={(e) => setJobType(e.target.value as "full_time" | "part_time" | "wfh")}
+          className={inputCls}
+        >
+          <option value="full_time">Full-time</option>
+          <option value="part_time">Part-time</option>
+          <option value="wfh">Work From Home</option>
+        </select>
       </Field>
       <Field label="Preferred districts">
         <div className="flex flex-wrap gap-2">

@@ -25,17 +25,17 @@ export function PrivacyForm({ initialPolicy }: { initialPolicy: "never" | "on_ap
 
   return (
     <div className="space-y-2">
-      {OPTIONS.map(([val, label]) => (
-        <label key={val} className="flex items-center gap-2 text-sm">
-          <input
-            type="radio"
-            name="contactShare"
-            checked={policy === val}
-            onChange={() => save(val)}
-          />
-          {label}
-        </label>
-      ))}
+      <select
+        value={policy}
+        onChange={(e) => save(e.target.value as typeof policy)}
+        className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-[var(--ink)] text-sm"
+      >
+        {OPTIONS.map(([val, label]) => (
+          <option key={val} value={val}>
+            {label}
+          </option>
+        ))}
+      </select>
       {isPending && <p className="text-xs text-[var(--ink-faint)]">Saving...</p>}
       {saved && !isPending && <p className="text-xs text-[var(--ok)]">Saved.</p>}
     </div>

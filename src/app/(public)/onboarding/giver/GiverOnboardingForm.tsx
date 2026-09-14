@@ -145,20 +145,18 @@ export function GiverOnboardingForm({
             No Approver is assigned to your district yet. Please check back later or contact support.
           </p>
         ) : (
-          <div className="space-y-2">
+          <select
+            value={approverId}
+            onChange={(e) => setApproverId(e.target.value ? Number(e.target.value) : "")}
+            className={inputCls}
+          >
+            <option value="">Select an Approver</option>
             {approvers.map((a) => (
-              <button
-                type="button"
-                key={a.id}
-                onClick={() => setApproverId(a.id)}
-                className={`w-full text-left px-3 py-2 rounded-md border ${
-                  approverId === a.id ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-[var(--border)]"
-                }`}
-              >
+              <option key={a.id} value={a.id}>
                 {a.name}
-              </button>
+              </option>
             ))}
-          </div>
+          </select>
         )}
       </Field>
       {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
