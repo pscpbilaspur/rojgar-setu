@@ -3,6 +3,13 @@
 /* Design tokens ported 1:1 from the approved clickable prototype
    (rojgar-setu-prototype.html) so the real build matches exactly. */
 :root {
+  /* Tells the browser this page only supports the light palette (paired
+     with the `viewport.colorScheme` meta tag in layout.tsx) — without it,
+     some Android browsers' "force dark for web content" setting repaints
+     the page dark on top of our own colors and gets elements wrong,
+     producing unreadable black-on-dark text even though our own CSS never
+     asked for dark mode. */
+  color-scheme: light;
   --bg: #F4F6F5; --surface: #FFFFFF; --surface-2: #EBEFEC; --border: #DCE3DE;
   --ink: #1B2622; --ink-muted: #5B6A63; --ink-faint: #8C9A93;
   --accent: #3E7A73; --accent-soft: #DCEBE8; --accent-ink: #245952;

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 // Section 10.4 of the master build prompt: the font stack must cover
@@ -17,6 +17,18 @@ export const metadata: Metadata = {
   title: "Central Panchayat Rojgar Setu",
   description:
     "Pujya Sindhi Central Panchayat Bilaspur's free, non-commercial community employment-matching platform.",
+};
+
+// The site never sets data-theme="dark" (see globals.css) and has no
+// light/dark toggle, so it should always render as the light palette — but
+// without explicitly declaring that here, some Android phones' "force dark
+// for web content" browser setting still auto-repaints the page dark on top
+// of our own colors, and gets individual elements wrong (a user reported
+// dashboard text rendering in unreadable black). `colorScheme: "light"`
+// tells the browser this page only supports light mode, which makes Chrome
+// / most Android WebViews skip that forced-dark repaint entirely.
+export const viewport: Viewport = {
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
