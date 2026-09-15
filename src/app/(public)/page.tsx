@@ -6,7 +6,7 @@ import { getRecentOpenJobs } from "@/lib/queries/jobs";
 import { countPlatformStats } from "@/lib/queries/people";
 import { getAllDistricts } from "@/lib/queries/lookups";
 import { getCurrentUser } from "@/lib/dal";
-import { jobTypeLabel } from "@/lib/format";
+import { jobTypeLabel, postedAgoLabel } from "@/lib/format";
 
 export default async function HomePage() {
   const { lang, t } = await getTranslations();
@@ -218,6 +218,16 @@ export default async function HomePage() {
                       <p className="text-[12px] text-[var(--ink-faint)] mt-2">
                         {job.district} · {jobTypeLabel(job.jobType, lang)}
                       </p>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                        {job.salaryRange && (
+                          <span className="text-[11px] font-medium text-[var(--accent2)] bg-[var(--accent2-soft)] px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                            ₹ {job.salaryRange}
+                          </span>
+                        )}
+                        <span className="text-[11px] text-[var(--ink-faint)] bg-[var(--surface-2)] px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                          🕒 {postedAgoLabel(job.createdAt, lang)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </Link>

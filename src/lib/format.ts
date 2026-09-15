@@ -59,3 +59,32 @@ export const JOB_TYPE_LABEL: Record<string, { hi: string; en: string }> = {
 export function jobTypeLabel(jobType: string, lang: "hi" | "en"): string {
   return JOB_TYPE_LABEL[jobType]?.[lang] ?? jobType;
 }
+
+/**
+ * Bilingual "posted N days ago" style label for a job card — the mockup the
+ * user shared showed a small time-posted badge on each listing, which this
+ * app's job cards didn't have before. Kept simple (day-granularity, no
+ * hours/minutes) since a job listing doesn't need finer precision than that,
+ * and computed in whole days against IST so it lines up with the IST dates
+ * shown elsewhere (formatDateIST) rather than drifting from the server's UTC
+ * clock.
+ */
+export function postedAgoLabel(value: Date | string, lang: "hi" | "en"): string {
+  const posted = new Date(value);
+  const now = new Date();
+  // Compare calendar dates in IST, not raw millisecond deltas, so a job
+  // posted at 11:58pm IST reads "Today" a minute later rather than "1 day
+  // ago" the instant midnight UTC ticks over.
+  const toISTDateOnly = (d: Date) =>
+    new Date(d.toLocaleDateString("en-US", { timeZone: IST_TIME_ZONE }));
+  const days = Math.round(
+    (toISTDateOnly(now).getTime() - toISTDateOnly(posted).getTime()) / 86400000
+  );
+  if (days <= 0) return lang === "hi" ? "आज" : "Today";
+  if (days === 1) return lang === "hi" ? "कल" : "Yesterday";
+  if (days < 30) return lang === "hi" ? `${days} दिन पहले` : `${days} days ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return lang === "hi" ? `${months} महीने पहले` : `${months}mo ago`;
+  const years = Math.floor(months / 12);
+  return lang === "hi" ? `${years} साल पहले` : `${years}y ago`;
+}

@@ -9,7 +9,7 @@ import { ReportJobButton } from "./ReportJobButton";
 
 export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { lang } = await getTranslations();
+  const { lang, t } = await getTranslations();
   const current = await getCurrentUser();
   const job = await getJobDetail(Number(id), current?.seekerProfile?.id);
   if (!job) notFound();
@@ -29,14 +29,14 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
           {job.salaryRange ? ` · ${job.salaryRange}` : ""}
         </p>
         {job.qualification && (
-          <p className="text-sm text-[var(--ink-muted)] mt-1">Minimum qualification: {job.qualification}</p>
+          <p className="text-sm text-[var(--ink-muted)] mt-1">{t("job_minQualification")}: {job.qualification}</p>
         )}
-        <div className="text-sm font-semibold text-[var(--ink)] mt-4">What this job involves</div>
+        <div className="text-sm font-semibold text-[var(--ink)] mt-4">{t("job_involves")}</div>
         <p className="mt-1 whitespace-pre-line text-[var(--ink)]">{job.description}</p>
 
         {job.skills && (
           <>
-            <div className="text-sm font-semibold text-[var(--ink)] mt-4">Skills / requirements</div>
+            <div className="text-sm font-semibold text-[var(--ink)] mt-4">{t("job_skillsRequirements")}</div>
             <p className="text-[var(--ink)] mt-1 whitespace-pre-line">{job.skills}</p>
           </>
         )}
@@ -44,15 +44,15 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
         <div className="mt-6">
           {!current ? (
             <Link href="/login" className="bg-[var(--accent)] text-white rounded-md px-5 py-2 font-medium inline-block">
-              Log in to Apply
+              {t("job_loginToApply")}
             </Link>
           ) : !current.seekerProfile ? (
             <p className="text-sm text-[var(--ink-muted)]">
-              You need a Job Seeker profile to apply.{" "}
-              <Link href="/onboarding/seeker" className="underline">Create one</Link>
+              {t("job_needSeekerProfile")}{" "}
+              <Link href="/onboarding/seeker" className="underline">{t("job_createOne")}</Link>
             </p>
           ) : job.alreadyApplied ? (
-            <p className="text-[var(--ok)] font-medium">✓ You've already applied to this job.</p>
+            <p className="text-[var(--ok)] font-medium">{t("job_alreadyApplied")}</p>
           ) : (
             <ApplyButton jobId={job.id} />
           )}

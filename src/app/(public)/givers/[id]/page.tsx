@@ -8,7 +8,7 @@ import { getTranslations } from "@/lib/i18n";
 
 export default async function GiverProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { lang } = await getTranslations();
+  const { lang, t } = await getTranslations();
   const current = await getCurrentUser();
   const profile = await getGiverPublicProfile(Number(id), Boolean(current));
   if (!profile) notFound();
@@ -42,18 +42,18 @@ export default async function GiverProfilePage({ params }: { params: Promise<{ i
         <div className="mt-4 pt-4 border-t border-[var(--border)]">
           {profile.contactPersonName ? (
             <p className="text-sm text-[var(--ink)]">
-              Contact person: <span className="font-medium">{profile.contactPersonName}</span>
+              {t("giver_contactPersonLabel")}: <span className="font-medium">{profile.contactPersonName}</span>
             </p>
           ) : (
             <p className="text-sm text-[var(--ink-faint)]">
-              <a href="/login" className="underline">Log in</a> to see the contact person&apos;s name.
+              <a href="/login" className="underline">{t("giver_loginToSeeContact")}</a>
             </p>
           )}
         </div>
 
-        <div className="section-title text-sm font-semibold text-[var(--ink)] mt-6 mb-2">Open jobs</div>
+        <div className="section-title text-sm font-semibold text-[var(--ink)] mt-6 mb-2">{t("giver_openJobsHeading")}</div>
         {profile.openJobs.length === 0 ? (
-          <p className="text-sm text-[var(--ink-muted)]">No active jobs right now.</p>
+          <p className="text-sm text-[var(--ink-muted)]">{t("giver_noActiveJobs")}</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {profile.openJobs.map((j) => (

@@ -150,6 +150,62 @@ export function InitialAvatar({ name, size = 40 }: { name: string; size?: number
 }
 
 /**
+ * A row of tap-to-filter pill links — replaces a `<select>` dropdown for a
+ * single-choice filter (district, job type) on the browse pages, matching
+ * the mockup's chip-style filter row the user asked for. Deliberately built
+ * as plain `<Link>`s to query-string URLs rather than a client-side
+ * dropdown-replacement widget, so it works with zero JavaScript exactly like
+ * the GET-form filters it replaces — each pill is just a normal link that
+ * sets one query param while preserving whichever others are passed in via
+ * `otherParams` (e.g. keeping `q`/`type` when a district pill is clicked).
+ */
+export function FilterChipRow({
+  basePath,
+  paramName,
+  options,
+  activeValue,
+  otherParams = {},
+  allLabel,
+}: {
+  basePath: string;
+  paramName: string;
+  options: { value: string; label: string }[];
+  activeValue?: string;
+  otherParams?: Record<string, string | undefined>;
+  allLabel: string;
+}) {
+  const hrefFor = (value?: string) => {
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(otherParams)) {
+      if (v) params.set(k, v);
+    }
+    if (value) params.set(paramName, value);
+    const qs = params.toString();
+    return qs ? `${basePath}?${qs}` : basePath;
+  };
+
+  const pillCls = (active: boolean) =>
+    `shrink-0 px-3 py-1.5 rounded-full text-[13px] font-medium border whitespace-nowrap transition-colors ${
+      active
+        ? "bg-[var(--accent)] text-white border-[var(--accent)]"
+        : "bg-[var(--surface)] text-[var(--ink-muted)] border-[var(--border)] hover:border-[var(--accent)]"
+    }`;
+
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+      <Link href={hrefFor(undefined)} className={pillCls(!activeValue)}>
+        {allLabel}
+      </Link>
+      {options.map((o) => (
+        <Link key={o.value} href={hrefFor(o.value)} className={pillCls(activeValue === o.value)}>
+          {o.label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+/**
  * A native, no-JS collapsible section (the browser's own <details>/<summary>
  * disclosure widget) — used for secondary homepage content (Our Purpose, How
  * it Works, Recent Jobs) so the page is short by default on mobile and each

@@ -52,17 +52,26 @@ export function BrandHeaderLockup() {
   );
 }
 
-/** Large hero lockup for the homepage. */
+/**
+ * Large hero lockup for the homepage. Previously stacked vertically and
+ * centered (logo, then org name below it, then platform name below that) —
+ * changed to a side-by-side row (logo left, both name lines stacked to its
+ * right) at the user's explicit request, matching the mockup's logo+title
+ * row treatment instead of a centered vertical stack. The whole row is
+ * still centered as a unit via `mx-auto` on the text block's parent, and
+ * wraps to a centered stack again only below `sm` where a horizontal row
+ * would otherwise get cramped next to a ~74px logo.
+ */
 export function BrandHeroLockup() {
   return (
-    <div className="flex flex-col items-center text-center gap-2">
-      <BrandMark size={74} />
-      <div className="text-[15px] font-semibold text-[var(--ink-muted)] mt-2">
-        {ORG_NAME_HI}
+    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center sm:text-left">
+      <BrandMark size={62} className="shrink-0" />
+      <div>
+        <div className="text-[14px] font-semibold text-[var(--ink-muted)]">{ORG_NAME_HI}</div>
+        <h1 className="text-[clamp(24px,5.5vw,34px)] font-bold text-[var(--ink)] leading-tight mt-0.5">
+          {PLATFORM_NAME_HI}
+        </h1>
       </div>
-      <h1 className="text-[clamp(26px,5.5vw,38px)] font-bold text-[var(--ink)] mt-1">
-        {PLATFORM_NAME_HI}
-      </h1>
     </div>
   );
 }

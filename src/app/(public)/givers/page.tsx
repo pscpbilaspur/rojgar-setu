@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { browseGivers } from "@/lib/queries/people";
 import { getAllDistricts } from "@/lib/queries/lookups";
-import { InitialAvatar } from "@/components/ui";
+import { InitialAvatar, FilterChipRow } from "@/components/ui";
 
 export default async function GiversPage({
   searchParams,
@@ -20,17 +20,15 @@ export default async function GiversPage({
     <div className="max-w-5xl mx-auto px-4 py-8">
       <h1 className="text-xl font-bold text-[var(--ink)] mb-4">Find Job Givers</h1>
 
-      <form className="flex flex-wrap gap-2 mb-6" method="get">
-        <select name="district" defaultValue={params.district ?? ""} className="border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-sm">
-          <option value="">All districts</option>
-          {districts.filter((d) => !d.isRemote).map((d) => (
-            <option key={d.id} value={d.id}>{d.district}</option>
-          ))}
-        </select>
-        <button type="submit" className="bg-[var(--accent)] text-white rounded-md px-4 py-2 text-sm font-medium">
-          Filter
-        </button>
-      </form>
+      <div className="mb-6">
+        <FilterChipRow
+          basePath="/givers"
+          paramName="district"
+          allLabel="All districts"
+          activeValue={params.district}
+          options={districts.filter((d) => !d.isRemote).map((d) => ({ value: String(d.id), label: d.district }))}
+        />
+      </div>
 
       {givers.length === 0 ? (
         <p className="text-[var(--ink-muted)]">No job givers match these filters yet.</p>

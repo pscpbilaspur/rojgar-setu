@@ -7,7 +7,7 @@ import { getTranslations } from "@/lib/i18n";
 
 export default async function SeekerProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { lang } = await getTranslations();
+  const { lang, t } = await getTranslations();
   const current = await getCurrentUser();
   const profile = await getSeekerPublicProfile(Number(id), Boolean(current));
   if (!profile) notFound();
@@ -21,7 +21,7 @@ export default async function SeekerProfilePage({ params }: { params: Promise<{ 
         <h1 className="text-xl font-bold text-[var(--ink)]">{profile.name}</h1>
         <p className="text-[var(--ink-muted)] mt-1">{profile.qualification ?? "—"}</p>
         <p className="text-sm text-[var(--ink-faint)] mt-1">
-          Hometown: {profile.district} · {jobTypeLabel(profile.jobType, lang)}
+          {t("profile_hometown")}: {profile.district} · {jobTypeLabel(profile.jobType, lang)}
           {profile.expectedSalary ? ` · ${profile.expectedSalary}` : ""}
         </p>
         {profile.verificationPending && (
@@ -30,7 +30,7 @@ export default async function SeekerProfilePage({ params }: { params: Promise<{ 
 
         {profile.preferredDistricts.length > 0 && (
           <>
-            <div className="text-sm font-semibold text-[var(--ink)] mt-4">Available to work in</div>
+            <div className="text-sm font-semibold text-[var(--ink)] mt-4">{t("profile_availableIn")}</div>
             <div className="flex flex-wrap gap-1.5 mt-1.5">
               {profile.preferredDistricts.map((d) => (
                 <span key={d} className="text-xs bg-[var(--accent2-soft)] text-[var(--ink)] px-2 py-1 rounded-full">
@@ -43,21 +43,21 @@ export default async function SeekerProfilePage({ params }: { params: Promise<{ 
 
         {profile.experience && (
           <>
-            <div className="text-sm font-semibold text-[var(--ink)] mt-4">Experience</div>
+            <div className="text-sm font-semibold text-[var(--ink)] mt-4">{t("field_experience")}</div>
             <p className="text-[var(--ink)] mt-1 whitespace-pre-line">{profile.experience}</p>
           </>
         )}
 
         {profile.skills && (
           <>
-            <div className="text-sm font-semibold text-[var(--ink)] mt-4">Skills</div>
+            <div className="text-sm font-semibold text-[var(--ink)] mt-4">{t("field_skills")}</div>
             <p className="text-[var(--ink)] mt-1 whitespace-pre-line">{profile.skills}</p>
           </>
         )}
 
         {profile.additionalNote && (
           <>
-            <div className="text-sm font-semibold text-[var(--ink)] mt-4">Anything else</div>
+            <div className="text-sm font-semibold text-[var(--ink)] mt-4">{t("profile_anythingElse")}</div>
             <p className="text-[var(--ink)] mt-1 whitespace-pre-line">{profile.additionalNote}</p>
           </>
         )}
@@ -71,15 +71,13 @@ export default async function SeekerProfilePage({ params }: { params: Promise<{ 
         <div className="mt-6 pt-4 border-t border-[var(--border)]">
           {profile.mobile ? (
             <p className="text-sm text-[var(--ink)]">
-              Contact: <span className="font-medium">{profile.mobile}</span>
+              {t("profile_contactLabel")}: <span className="font-medium">{profile.mobile}</span>
             </p>
           ) : current ? (
-            <p className="text-sm text-[var(--ink-faint)]">
-              This person has chosen to share contact details only after applying to a job, or not at all.
-            </p>
+            <p className="text-sm text-[var(--ink-faint)]">{t("profile_contactConditional")}</p>
           ) : (
             <p className="text-sm text-[var(--ink-faint)]">
-              <a href="/login" className="underline">Log in</a> to see more, and to contact this person where they allow it.
+              <a href="/login" className="underline">{t("profile_loginToSeeMore")}</a>
             </p>
           )}
         </div>

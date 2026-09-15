@@ -94,6 +94,27 @@ export const dict = {
     home_searchAllDistricts: "सभी जिले",
     home_searchAnyJobType: "सभी श्रेणियां",
     home_searchCta: "नौकरी खोजें",
+    // Job / seeker / giver detail pages — previously hardcoded English-only
+    // on all three pages (missed by the earlier site-wide wording pass,
+    // which covered the listing pages but not these), fixed here.
+    job_minQualification: "न्यूनतम योग्यता",
+    job_involves: "इस काम में क्या शामिल है",
+    job_skillsRequirements: "कौशल / आवश्यकताएं",
+    job_loginToApply: "आवेदन के लिए लॉगिन करें",
+    job_needSeekerProfile: "आवेदन करने के लिए आपको Job Seeker प्रोफ़ाइल चाहिए।",
+    job_createOne: "एक बनाएं",
+    job_alreadyApplied: "✓ आप पहले ही इस नौकरी के लिए आवेदन कर चुके हैं।",
+    profile_hometown: "गृह जिला",
+    profile_availableIn: "काम के लिए उपलब्ध",
+    profile_anythingElse: "कुछ और",
+    profile_contactLabel: "संपर्क",
+    profile_contactConditional:
+      "इस व्यक्ति ने तय किया है कि यह अपना संपर्क नंबर किसी नियोक्ता के साथ केवल उनकी नौकरी के लिए आवेदन करने के बाद साझा करेगा — या बिल्कुल नहीं।",
+    profile_loginToSeeMore: "अधिक जानकारी देखने के लिए, और जहां अनुमति हो वहां इस व्यक्ति से संपर्क करने के लिए लॉगिन करें।",
+    giver_contactPersonLabel: "संपर्क व्यक्ति",
+    giver_loginToSeeContact: "संपर्क व्यक्ति का नाम देखने के लिए लॉगिन करें।",
+    giver_openJobsHeading: "खुली नौकरियां",
+    giver_noActiveJobs: "अभी कोई सक्रिय नौकरी नहीं है।",
   },
   en: {
     nav_home: "Home",
@@ -182,6 +203,26 @@ export const dict = {
     home_searchAllDistricts: "All districts",
     home_searchAnyJobType: "Any job type",
     home_searchCta: "Search Jobs",
+    // Job / seeker / giver detail pages — see the matching Hindi block for
+    // why these exist as their own keys.
+    job_minQualification: "Minimum qualification",
+    job_involves: "What this job involves",
+    job_skillsRequirements: "Skills / requirements",
+    job_loginToApply: "Log in to Apply",
+    job_needSeekerProfile: "You need a Job Seeker profile to apply.",
+    job_createOne: "Create one",
+    job_alreadyApplied: "✓ You've already applied to this job.",
+    profile_hometown: "Hometown",
+    profile_availableIn: "Available to work in",
+    profile_anythingElse: "Anything else",
+    profile_contactLabel: "Contact",
+    profile_contactConditional:
+      "This person has chosen to share their contact number with an employer only after applying to that employer's job — or not at all.",
+    profile_loginToSeeMore: "Log in to see more, and to contact this person where they allow it.",
+    giver_contactPersonLabel: "Contact person",
+    giver_loginToSeeContact: "Log in to see the contact person's name.",
+    giver_openJobsHeading: "Open jobs",
+    giver_noActiveJobs: "No active jobs right now.",
   },
 } as const;
 

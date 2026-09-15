@@ -4,7 +4,7 @@ import { getAllDistricts } from "@/lib/queries/lookups";
 import { getCurrentUser } from "@/lib/dal";
 import { VERIFICATION_STATUS_LABEL, jobTypeLabel } from "@/lib/format";
 import { getTranslations } from "@/lib/i18n";
-import { InitialAvatar } from "@/components/ui";
+import { InitialAvatar, FilterChipRow } from "@/components/ui";
 
 export default async function PeoplePage({
   searchParams,
@@ -27,23 +27,28 @@ export default async function PeoplePage({
     <div className="max-w-5xl mx-auto px-4 py-8">
       <h1 className="text-xl font-bold text-[var(--ink)] mb-4">Find People</h1>
 
-      <form className="flex flex-wrap gap-2 mb-6" method="get">
-        <select name="district" defaultValue={params.district ?? ""} className="border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-sm">
-          <option value="">All districts</option>
-          {districts.filter((d) => !d.isRemote).map((d) => (
-            <option key={d.id} value={d.id}>{d.district}</option>
-          ))}
-        </select>
-        <select name="type" defaultValue={params.type ?? ""} className="border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-sm">
-          <option value="">Any job type</option>
-          <option value="full_time">{jobTypeLabel("full_time", lang)}</option>
-          <option value="part_time">{jobTypeLabel("part_time", lang)}</option>
-          <option value="wfh">{jobTypeLabel("wfh", lang)}</option>
-        </select>
-        <button type="submit" className="bg-[var(--accent)] text-white rounded-md px-4 py-2 text-sm font-medium">
-          Filter
-        </button>
-      </form>
+      <div className="space-y-2 mb-6">
+        <FilterChipRow
+          basePath="/people"
+          paramName="district"
+          allLabel="All districts"
+          activeValue={params.district}
+          otherParams={{ type: params.type }}
+          options={districts.filter((d) => !d.isRemote).map((d) => ({ value: String(d.id), label: d.district }))}
+        />
+        <FilterChipRow
+          basePath="/people"
+          paramName="type"
+          allLabel="Any job type"
+          activeValue={params.type}
+          otherParams={{ district: params.district }}
+          options={[
+            { value: "full_time", label: jobTypeLabel("full_time", lang) },
+            { value: "part_time", label: jobTypeLabel("part_time", lang) },
+            { value: "wfh", label: jobTypeLabel("wfh", lang) },
+          ]}
+        />
+      </div>
 
       {people.length === 0 ? (
         <p className="text-[var(--ink-muted)]">No one matches these filters yet.</p>
@@ -79,6 +84,12 @@ export default async function PeoplePage({
                   {p.verificationPending && (
                     <p className="text-xs text-[var(--warn)] mt-1">{VERIFICATION_STATUS_LABEL.not_yet_done}</p>
                   )}
+                  {/* Explicit "View Profile" pill (mockup style) — the whole
+                      card is already clickable, this is a visible affordance
+                      on top of that, not a second/different destination. */}
+                  <span className="inline-block mt-3 text-[12px] font-semibold text-[var(--accent-ink)] bg-[var(--accent-soft)] px-3 py-1 rounded-full">
+                    View Profile →
+                  </span>
                 </div>
               </div>
             </Link>
