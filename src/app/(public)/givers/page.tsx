@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { browseGivers } from "@/lib/queries/people";
 import { getAllDistricts } from "@/lib/queries/lookups";
+import { InitialAvatar } from "@/components/ui";
 
 export default async function GiversPage({
   searchParams,
@@ -42,9 +43,14 @@ export default async function GiversPage({
               className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4"
               style={{ boxShadow: "var(--shadow)" }}
             >
-              <h3 className="font-semibold text-[var(--ink)]">{g.businessName}</h3>
-              <p className="text-sm text-[var(--ink-muted)] mt-0.5">{g.category}</p>
-              <p className="text-xs text-[var(--ink-faint)] mt-2">{g.district}</p>
+              <div className="flex items-start gap-3">
+                <InitialAvatar name={g.businessName} />
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-[var(--ink)]">{g.businessName}</h3>
+                  <p className="text-sm text-[var(--ink-muted)] mt-0.5">{g.category}</p>
+                  <p className="text-xs text-[var(--ink-faint)] mt-2">{g.district}</p>
+                </div>
+              </div>
             </Link>
           ))}
         </div>

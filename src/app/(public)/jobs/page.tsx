@@ -4,20 +4,22 @@ import { getAllDistricts } from "@/lib/queries/lookups";
 import { getCurrentUser } from "@/lib/dal";
 import { getTranslations } from "@/lib/i18n";
 import { jobTypeLabel } from "@/lib/format";
+import { InitialAvatar } from "@/components/ui";
 
 export default async function JobsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ district?: string; type?: string }>;
+  searchParams: Promise<{ district?: string; type?: string; q?: string }>;
 }) {
   const params = await searchParams;
   const districtId = params.district ? Number(params.district) : undefined;
   const jobType = params.type || undefined;
+  const q = params.q || undefined;
 
   const { lang } = await getTranslations();
   const current = await getCurrentUser();
   const [jobsList, districts] = await Promise.all([
-    browseOpenJobs({ districtId, jobType }, current?.seekerProfile?.id),
+    browseOpenJobs({ districtId, jobType, q }, current?.seekerProfile?.id),
     getAllDistricts(),
   ]);
 
@@ -26,6 +28,13 @@ export default async function JobsPage({
       <h1 className="text-xl font-bold text-[var(--ink)] mb-4">Find Jobs</h1>
 
       <form className="flex flex-wrap gap-2 mb-6" method="get">
+        <input
+          type="text"
+          name="q"
+          defaultValue={params.q ?? ""}
+          placeholder="Job title, company or skill"
+          className="border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-sm flex-1 min-w-[160px]"
+        />
         <select name="district" defaultValue={params.district ?? ""} className="border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-sm">
           <option value="">All districts</option>
           {districts.filter((d) => !d.isRemote).map((d) => (
@@ -54,19 +63,24 @@ export default async function JobsPage({
               className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4"
               style={{ boxShadow: "var(--shadow)" }}
             >
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-semibold text-[var(--ink)]">{job.title}</h3>
-                {job.alreadyApplied && (
-                  <span className="shrink-0 text-[11px] font-medium text-[var(--ok)] bg-[var(--ok-soft)] px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                    ✓ Applied
-                  </span>
-                )}
+              <div className="flex items-start gap-3">
+                <InitialAvatar name={job.businessName} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-semibold text-[var(--ink)]">{job.title}</h3>
+                    {job.alreadyApplied && (
+                      <span className="shrink-0 text-[11px] font-medium text-[var(--ok)] bg-[var(--ok-soft)] px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                        ✓ Applied
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-[var(--ink-muted)] mt-0.5">{job.businessName}</p>
+                  <p className="text-xs text-[var(--ink-faint)] mt-2">
+                    {job.district} · {jobTypeLabel(job.jobType, lang)}
+                    {job.salaryRange ? ` · ${job.salaryRange}` : ""}
+                  </p>
+                </div>
               </div>
-              <p className="text-sm text-[var(--ink-muted)] mt-0.5">{job.businessName}</p>
-              <p className="text-xs text-[var(--ink-faint)] mt-2">
-                {job.district} · {jobTypeLabel(job.jobType, lang)}
-                {job.salaryRange ? ` · ${job.salaryRange}` : ""}
-              </p>
             </Link>
           ))}
         </div>

@@ -4,6 +4,7 @@ import { getAllDistricts } from "@/lib/queries/lookups";
 import { getCurrentUser } from "@/lib/dal";
 import { VERIFICATION_STATUS_LABEL, jobTypeLabel } from "@/lib/format";
 import { getTranslations } from "@/lib/i18n";
+import { InitialAvatar } from "@/components/ui";
 
 export default async function PeoplePage({
   searchParams,
@@ -55,26 +56,31 @@ export default async function PeoplePage({
               className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4"
               style={{ boxShadow: "var(--shadow)" }}
             >
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-semibold text-[var(--ink)]">{p.name}</h3>
-                {(p.alreadyApplied || p.alreadyContacted) && (
-                  <span className="shrink-0 text-[11px] font-medium text-[var(--ok)] bg-[var(--ok-soft)] px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                    {p.alreadyApplied ? "✓ Applied" : "✓ Messaged you"}
-                  </span>
-                )}
+              <div className="flex items-start gap-3">
+                <InitialAvatar name={p.name} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-semibold text-[var(--ink)]">{p.name}</h3>
+                    {(p.alreadyApplied || p.alreadyContacted) && (
+                      <span className="shrink-0 text-[11px] font-medium text-[var(--ok)] bg-[var(--ok-soft)] px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                        {p.alreadyApplied ? "✓ Applied" : "✓ Messaged you"}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-[var(--ink-muted)] mt-0.5">{p.qualification ?? "—"}</p>
+                  <p className="text-xs text-[var(--ink-faint)] mt-2">
+                    {p.district} · {jobTypeLabel(p.jobType, lang)}
+                  </p>
+                  {p.preferredDistricts.length > 0 && (
+                    <p className="text-xs text-[var(--ink-faint)] mt-1">
+                      Available in: {p.preferredDistricts.join(", ")}
+                    </p>
+                  )}
+                  {p.verificationPending && (
+                    <p className="text-xs text-[var(--warn)] mt-1">{VERIFICATION_STATUS_LABEL.not_yet_done}</p>
+                  )}
+                </div>
               </div>
-              <p className="text-sm text-[var(--ink-muted)] mt-0.5">{p.qualification ?? "—"}</p>
-              <p className="text-xs text-[var(--ink-faint)] mt-2">
-                {p.district} · {jobTypeLabel(p.jobType, lang)}
-              </p>
-              {p.preferredDistricts.length > 0 && (
-                <p className="text-xs text-[var(--ink-faint)] mt-1">
-                  Available in: {p.preferredDistricts.join(", ")}
-                </p>
-              )}
-              {p.verificationPending && (
-                <p className="text-xs text-[var(--warn)] mt-1">{VERIFICATION_STATUS_LABEL.not_yet_done}</p>
-              )}
             </Link>
           ))}
         </div>

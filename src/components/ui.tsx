@@ -112,6 +112,43 @@ export function StatusBadge({ status, label }: { status: string; label?: string 
   );
 }
 
+// A small fixed rotation of the app's own pastel "-soft" tokens (never a
+// hardcoded hex — see the no-hardcoded-color convention noted throughout
+// this codebase) — each is already tuned to read correctly against
+// var(--ink) text in both light and dark mode, since every "-soft" token
+// is a light tint in light mode and a dark tint in dark mode, with --ink
+// flipping to match. Deliberately skips --danger-soft (reads as an
+// alert/error color, wrong tone for a plain name initial).
+const AVATAR_PALETTE = [
+  "var(--accent-soft)",
+  "var(--accent2-soft)",
+  "var(--ok-soft)",
+  "var(--warn-soft)",
+  "var(--giver-accent-soft)",
+];
+
+/** A colored circle showing someone/something's first initial — a business,
+ * a candidate, a job posting — picked deterministically from `name` so the
+ * same name always gets the same color (not random on every render), used
+ * to give listing cards (jobs/candidates/employers) a quicker visual
+ * anchor than a plain text-only row. */
+export function InitialAvatar({ name, size = 40 }: { name: string; size?: number }) {
+  const trimmed = name.trim();
+  const initial = trimmed ? trimmed[0].toUpperCase() : "?";
+  let hash = 0;
+  for (let i = 0; i < trimmed.length; i++) hash = (hash * 31 + trimmed.charCodeAt(i)) % 997;
+  const bg = AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
+  return (
+    <div
+      className="rounded-full flex items-center justify-center font-semibold text-[var(--ink)] shrink-0"
+      style={{ width: size, height: size, background: bg, fontSize: size * 0.42 }}
+      aria-hidden
+    >
+      {initial}
+    </div>
+  );
+}
+
 /**
  * A native, no-JS collapsible section (the browser's own <details>/<summary>
  * disclosure widget) — used for secondary homepage content (Our Purpose, How

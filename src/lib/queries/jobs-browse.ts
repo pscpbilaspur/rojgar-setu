@@ -1,15 +1,29 @@
 import "server-only";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, or, ilike } from "drizzle-orm";
 import { db } from "@/db";
 import { jobs, jobGiverProfiles, jobSkills, skills, qualifications, locations, applications } from "@/db/schema";
 
 /** `viewerSeekerId`, when passed, marks each job the logged-in Seeker has
  * already applied to (`alreadyApplied`) — so the same job doesn't just show
- * a plain "Apply" invite again once they've already sent one. */
-export async function browseOpenJobs(filters: { districtId?: number; jobType?: string } = {}, viewerSeekerId?: number) {
+ * a plain "Apply" invite again once they've already sent one.
+ *
+ * `q` is a free-text keyword — matched against the job title, the Giver's
+ * business name, and the free-text skills note (a partial, case-insensitive
+ * match on any one of the three is enough), so "tally" or "shivam" both
+ * find something reasonable the way a plain search box is expected to. */
+export async function browseOpenJobs(
+  filters: { districtId?: number; jobType?: string; q?: string } = {},
+  viewerSeekerId?: number
+) {
   const conditions = [eq(jobs.status, "open"), eq(jobs.moderationState, "approved")];
   if (filters.districtId) conditions.push(eq(jobs.locationId, filters.districtId));
   if (filters.jobType) conditions.push(eq(jobs.jobType, filters.jobType));
+  if (filters.q?.trim()) {
+    const needle = `%${filters.q.trim()}%`;
+    conditions.push(
+      or(ilike(jobs.title, needle), ilike(jobGiverProfiles.businessName, needle), ilike(jobs.skillsNote, needle))!
+    );
+  }
 
   const rows = await db
     .select({

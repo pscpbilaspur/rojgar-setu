@@ -8,10 +8,12 @@
 
 export const dict = {
   hi: {
+    nav_home: "होम",
     nav_findJobs: "नौकरी खोजें",
     nav_findPeople: "लोग खोजें",
     nav_findGivers: "नियोक्ता खोजें",
     nav_login: "लॉगिन / रजिस्टर",
+    nav_loginShort: "लॉगिन",
     nav_dashboard: "डैशबोर्ड",
     nav_logout: "लॉगआउट",
     footer_suggest: "सुझाव दें",
@@ -88,12 +90,18 @@ export const dict = {
     home_statsSeekers: "पंजीकृत जॉब सीकर",
     home_statsGivers: "पंजीकृत जॉब गिवर",
     home_statsJobs: "खुली नौकरियां",
+    home_searchPlaceholder: "पद, कंपनी या कौशल खोजें",
+    home_searchAllDistricts: "सभी जिले",
+    home_searchAnyJobType: "सभी श्रेणियां",
+    home_searchCta: "नौकरी खोजें",
   },
   en: {
+    nav_home: "Home",
     nav_findJobs: "Find Jobs",
     nav_findPeople: "Find People",
     nav_findGivers: "Find Job Givers",
     nav_login: "Login / Register",
+    nav_loginShort: "Login",
     nav_dashboard: "Dashboard",
     nav_logout: "Log out",
     footer_suggest: "Give a suggestion",
@@ -170,6 +178,10 @@ export const dict = {
     home_statsSeekers: "Registered Job Seekers",
     home_statsGivers: "Registered Job Givers",
     home_statsJobs: "Open Jobs",
+    home_searchPlaceholder: "Search by job title, company or skill",
+    home_searchAllDistricts: "All districts",
+    home_searchAnyJobType: "Any job type",
+    home_searchCta: "Search Jobs",
   },
 } as const;
 

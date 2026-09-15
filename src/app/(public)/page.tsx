@@ -1,18 +1,20 @@
 import Link from "next/link";
 import { getTranslations } from "@/lib/i18n";
 import { BrandHeroLockup } from "@/components/Brand";
-import { FeatureCard, StepCard, CollapsibleSection } from "@/components/ui";
+import { FeatureCard, StepCard, CollapsibleSection, InitialAvatar } from "@/components/ui";
 import { getRecentOpenJobs } from "@/lib/queries/jobs";
 import { countPlatformStats } from "@/lib/queries/people";
+import { getAllDistricts } from "@/lib/queries/lookups";
 import { getCurrentUser } from "@/lib/dal";
 import { jobTypeLabel } from "@/lib/format";
 
 export default async function HomePage() {
   const { lang, t } = await getTranslations();
-  const [recentJobs, stats, current] = await Promise.all([
+  const [recentJobs, stats, current, districts] = await Promise.all([
     getRecentOpenJobs(3),
     countPlatformStats(),
     getCurrentUser(),
+    getAllDistricts(),
   ]);
   // Once someone is logged in as a Seeker or a Giver, one account = one role
   // (see (public)/onboarding — the other role is blocked outright), so the
@@ -66,6 +68,56 @@ export default async function HomePage() {
         <p className="max-w-[56ch] mx-auto mt-3 text-[14px] sm:text-base text-[var(--ink-muted)]">
           {t("home_heroSubtitle")}
         </p>
+
+        {/* Search + filter bar — lets a visitor jump straight to filtered
+            results from the homepage itself instead of having to open Find
+            Jobs first and filter from there. Plain GET form to /jobs, same
+            pattern as that page's own filter form, so it works without any
+            client-side JS. */}
+        <form
+          action="/jobs"
+          method="get"
+          className="max-w-2xl mx-auto mt-5 sm:mt-6 bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-2.5 sm:p-3 flex flex-col sm:flex-row gap-2"
+          style={{ boxShadow: "var(--shadow)" }}
+        >
+          <input
+            type="text"
+            name="q"
+            placeholder={t("home_searchPlaceholder")}
+            className="flex-1 min-w-0 border border-[var(--border)] rounded-md px-3 py-2 bg-[var(--surface)] text-[13px] sm:text-sm text-[var(--ink)]"
+          />
+          <div className="flex gap-2">
+            <select
+              name="district"
+              defaultValue=""
+              className="flex-1 sm:flex-none border border-[var(--border)] rounded-md px-2 py-2 bg-[var(--surface)] text-[13px] sm:text-sm text-[var(--ink)]"
+            >
+              <option value="">{t("home_searchAllDistricts")}</option>
+              {districts.filter((d) => !d.isRemote).map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.district}
+                </option>
+              ))}
+            </select>
+            <select
+              name="type"
+              defaultValue=""
+              className="flex-1 sm:flex-none border border-[var(--border)] rounded-md px-2 py-2 bg-[var(--surface)] text-[13px] sm:text-sm text-[var(--ink)]"
+            >
+              <option value="">{t("home_searchAnyJobType")}</option>
+              <option value="full_time">{jobTypeLabel("full_time", lang)}</option>
+              <option value="part_time">{jobTypeLabel("part_time", lang)}</option>
+              <option value="wfh">{jobTypeLabel("wfh", lang)}</option>
+            </select>
+          </div>
+          <button
+            type="submit"
+            className="bg-[var(--accent)] text-white rounded-md px-4 py-2 text-[13px] sm:text-sm font-semibold whitespace-nowrap"
+          >
+            🔎 {t("home_searchCta")}
+          </button>
+        </form>
+
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-5 sm:mt-7">
           {actionTiles.map((tile) => (
             <Link
@@ -158,11 +210,16 @@ export default async function HomePage() {
                   className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius)] p-4"
                   style={{ boxShadow: "var(--shadow)" }}
                 >
-                  <h4 className="font-semibold text-[var(--ink)]">{job.title}</h4>
-                  <p className="text-[13px] text-[var(--ink-muted)] mt-1">{job.businessName}</p>
-                  <p className="text-[12px] text-[var(--ink-faint)] mt-2">
-                    {job.district} · {jobTypeLabel(job.jobType, lang)}
-                  </p>
+                  <div className="flex items-start gap-3">
+                    <InitialAvatar name={job.businessName} />
+                    <div className="min-w-0">
+                      <h4 className="font-semibold text-[var(--ink)]">{job.title}</h4>
+                      <p className="text-[13px] text-[var(--ink-muted)] mt-1">{job.businessName}</p>
+                      <p className="text-[12px] text-[var(--ink-faint)] mt-2">
+                        {job.district} · {jobTypeLabel(job.jobType, lang)}
+                      </p>
+                    </div>
+                  </div>
                 </Link>
               ))}
             </div>

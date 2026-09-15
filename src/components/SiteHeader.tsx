@@ -42,9 +42,13 @@ export async function SiteHeader() {
                   <span aria-hidden>👤</span> {identity}
                 </span>
               )}
+              {/* Hidden on mobile — MobileBottomNav's "Account" tab already
+                  links here, so keeping this button too would just be the
+                  same destination shown twice on every page. Desktop has no
+                  bottom nav, so it keeps its own entry point here. */}
               <Link
                 href="/dashboard"
-                className="px-2.5 py-1.5 sm:px-3 rounded-md bg-[var(--accent)] text-white font-medium text-[13px] sm:text-sm whitespace-nowrap"
+                className="hidden sm:inline-block px-2.5 py-1.5 sm:px-3 rounded-md bg-[var(--accent)] text-white font-medium text-[13px] sm:text-sm whitespace-nowrap"
               >
                 {t("nav_dashboard")}
               </Link>
@@ -52,7 +56,7 @@ export async function SiteHeader() {
           ) : (
             <Link
               href="/login"
-              className="px-2.5 py-1.5 sm:px-3 rounded-md bg-[var(--accent)] text-white font-medium text-[13px] sm:text-sm whitespace-nowrap"
+              className="hidden sm:inline-block px-2.5 py-1.5 sm:px-3 rounded-md bg-[var(--accent)] text-white font-medium text-[13px] sm:text-sm whitespace-nowrap"
             >
               {t("nav_login")}
             </Link>
